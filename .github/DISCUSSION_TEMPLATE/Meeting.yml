@@ -1,0 +1,16 @@
+title: "[회의록] 2025-XX-XX"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 주요 논의 내용
+        1. **안건 1**: 내용 작성
+        2. **안건 2**: 내용 작성
+        
+        ## 결정사항
+        - 결정 1: 내용 작성
+        - 결정 2: 내용 작성
+        
+        ## Action Items
+        - [ ] Task 1 (담당자: 이름)
+        - [ ] Task 2 (담당자: 이름)
