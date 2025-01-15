@@ -3,6 +3,8 @@
 소스코드의 구성은 다음과 같습니다.
 ## 1. pdf_parsing (담당자 : 용가리)
 pdf_parsing 폴더에 총 4가지 py 파일이 들어가 있습니다.
+
+sample.ipynb에 코드 사용에 대한 흐름이 작성돼 있습니다.
 1. cropper.py
 > pdf, 페이지, 좌표를 입력받아 BASE_DIR로 지정된 폴더에 테이블, 그래프 이미지를 저장합니다.
 2. make_md_and_summaries.py
