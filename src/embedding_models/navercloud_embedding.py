@@ -15,8 +15,8 @@ def get_text_embedding(text):
     """
     # 환경 변수에서 API 키 가져오기
     host = 'clovastudio.apigw.ntruss.com'
-    api_key = os.environ['HyperclovaX_API_KEY']
-    api_key_primary_val = os.environ['HyperclovaX_PRIVATE_KEY']
+    api_key = os.environ['NAVERCLOUD_EMBEDDING_KEY']
+    api_key_primary_val = os.environ['NAVERCLOUD_EMBEDDING_PRIMARY_KEY']
     request_id = '8c4abff05a38493aac0cb39a43adf8be'
 
     # 요청 데이터 생성
