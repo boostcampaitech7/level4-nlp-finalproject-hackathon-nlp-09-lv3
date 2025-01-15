@@ -26,7 +26,9 @@ embedding_models 폴더는 총 1가지 py 파일이 들어가 있습니다.
 
 # 준비물
 > env 파일이 필요합니다. 현재 사용된 api는 총 4가지입니다.
-- upsage api key
-- navercloud api key
-- navercloud private key
-- openai api key
+- OPENAI_API_KEY
+- UPSTAGE_API_KEY
+- HyperclovaX_API_KEY
+- HyperclovaX_PRIVATE_KEY
+- NAVERCLOUD_EMBEDDING_KEY
+- NAVERCLOUD_EMBEDDING_PRIMARY_KEY
