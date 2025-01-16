@@ -1,0 +1,8 @@
+chromadb==0.6.3
+huggingface-hub==0.27.1
+numpy==2.2.1
+openai==1.59.7
+pandas==2.2.3
+pdfplumber==0.11.5
+python-dotenv==1.0.1
+requests==2.32.3
