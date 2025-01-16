@@ -122,11 +122,13 @@ def text_summarization(html_content, investment, company):
                 요약에 회사 이름을 반드시 포함하세요.
                 마크다운 문법으로 작성하세요.
 
-                [출력 형식]
-                글에 대한 요약 
-
                 [원문]
                 {html_content}
+
+                [출력 형식]
+                글에 대한 요약
+                
+                요약 :
                 """
             }
         ],
@@ -166,11 +168,13 @@ def text_summarization_Hyperclova(html_content, investment, company):
             요약에 회사 이름을 반드시 포함하세요.
             마크다운 문법으로 작성하세요.
 
+            [원문]
+            {html_content}
+
             [출력 형식]
             글에 대한 요약
 
-            [원문]
-            {html_content}
+            요약 :
             """
         }
     ]
