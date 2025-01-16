@@ -36,8 +36,9 @@ def image_summarization(image_path, investment, company):
                 이미지가 무엇을 나타내고 있는지 Retrieval을 위한 요약을 200자 이내로 작성하세요.
                 요약에 회사 이름을 반드시 포함하세요.
                 마크다운 문법으로 작성하세요.
+                만약 이미지가 사람밀 경우, [사람 이미지] 라고 출력하세요.
                 [출력 형식]
-                그래프에 대한 요약 (200자 이내)
+                그래프에 대한 요약
                 """
 
                 },
@@ -144,7 +145,7 @@ def text_summarization_Hyperclova(html_content, investment, company):
     host = 'https://clovastudio.stream.ntruss.com'
     api_key = os.environ['HyperclovaX_API_KEY']
     api_key_primary_val = os.environ['HyperclovaX_PRIVATE_KEY']
-    request_id = '1ce34b6cdf5545c4abbcc81b162d649b'
+    request_id = '95b33ce0c69540c184f917a08529e8b5'
 
     headers = {
         'X-NCP-CLOVASTUDIO-API-KEY': api_key,
