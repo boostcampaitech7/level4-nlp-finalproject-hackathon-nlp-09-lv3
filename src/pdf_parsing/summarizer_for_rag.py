@@ -204,6 +204,24 @@ def text_summarization_Hyperclova(html_content, investment, company):
     return result['result']['message']['content']
 
 def text_summarization_perplexcity():
+    '''
+        perplexcity로 api 연동하여 텍스트 요약하는 메서드
+
+        크레딧을 충전하고
+        무료 버전의 경우, 사용 가능한 모델은 아래 세 가지
+
+        llama-3.1-sonar-small-128k-online
+        llama-3.1-sonar-large-128k-online	
+        llama-3.1-sonar-huge-128k-online
+
+        유료 버전이 경우 Llama 3.3, GPT-4o, Claude-3 사용 가능
+
+        Parameters:
+        - 
+        Returns:
+        - 요약한 텍스트만 반환(str)
+    '''
+
     # API 키 설정 (실제 API 키로 대체해야 함)
     API_KEY = ""
 
@@ -252,5 +270,3 @@ def text_summarization_perplexcity():
     else:
         print(f"Error: {response.status_code}")
         print(response.text)
-
-text_summarization_perplexcity()
