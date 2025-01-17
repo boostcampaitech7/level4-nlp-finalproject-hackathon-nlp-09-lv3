@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from summarizer_for_rag import image_summarization, table_summarization, text_summarization, text_summarization_Hyperclova
 from cropper import crop_and_save
+from bs4 import BeautifulSoup
 
 def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
     if model == 'gpt-4o-mini':
@@ -87,4 +88,12 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
     csv_route = os.path.join(dir_route, file_name + '.csv')
     result['summary'] = result['summary'].apply(lambda x: x[x.find(':')+1:].lstrip())
     result.to_csv(csv_route, index = False)
+
+    def html_to_content(html):
+        if not isinstance(html, str):  # 입력이 문자열이 아닌 경우
+            return ""
+        soup = BeautifulSoup(html, 'html.parser')
+        return soup.get_text(separator=" ", strip=True)
+
+    result['original_content'].apply(lambda x: html_to_content(x))
     return result
