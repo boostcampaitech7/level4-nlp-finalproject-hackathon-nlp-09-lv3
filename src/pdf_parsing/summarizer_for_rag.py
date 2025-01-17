@@ -26,19 +26,18 @@ def image_summarization(image_path, investment, company):
             {
                 "role": "system", "content": 
 
-                "당신은 RAG 시스템을 위한 이미지 요약가입니다."
+                "당신은 RAG 시스템을 위한 요약가입니다. RAG 시스템을 위해 검색 엔진이 연관 문서를 잘 검색할 수 있도록 이미지를 설명해야 합니다."
 
                 },
                 {"role": "user", "content": [{"type": "text", "text": 
                                             
                 f"""
                 다음은 {investment}의 {company}에 대한 리포트 중 일부입니다.
-                이미지가 무엇을 나타내고 있는지 Retrieval을 위한 요약을 200자 이내로 작성하세요.
-                요약에 회사 이름을 반드시 포함하세요.
-                마크다운 문법으로 작성하세요.
+                이미지가 무엇을 나타내고 있는지 Retrieval을 위한 설명을 200자 이내로 작성하세요.
+                설명에 회사 이름을 반드시 포함하세요.
                 만약 이미지가 사람밀 경우, [사람 이미지] 라고 출력하세요.
                 [출력 형식]
-                그래프에 대한 요약
+                설명 : [그래프에 대한 설명]
                 """
 
                 },
@@ -71,7 +70,7 @@ def table_summarization(image_path, investment, company):
             {
                 "role": "system", "content": 
 
-                "당신은 RAG 시스템을 위한 요약가입니다."
+                "당신은 RAG 시스템을 위한 요약가입니다. RAG 시스템을 위해 검색 엔진이 연관 문서를 잘 검색할 수 있도록 테이블을 설명해야 합니다."
 
                 },
                 {"role": "user", "content": [{"type": "text", "text": 
@@ -79,14 +78,13 @@ def table_summarization(image_path, investment, company):
                 f"""
                 다음은 {investment}의 {company}에 대한 리포트 중 일부입니다.
                 주어진 테이블을 마크다운으로 표현하세요.
-                테이블이 무엇을 나타내고 있는지 Retrieval을 위한 요약을 200자 이내로 작성하세요.
+                테이블이 무엇을 나타내고 있는지 Retrieval을 위한 테이블에 대한 설명을 200자 이내로 작성하세요.
                 요약에 회사 이름을 반드시 포함하세요.
-                마크다운 문법으로 작성하세요.
 
                 [출력 형식]
                 [마크다운으로 표현된 Table]
                 
-                테이블에 대한 요약
+                설명 : [테이블에 대한 설명]
                 
                 '''markdown'''과 같은 표현은 삽입하지 마세요.
                 """
@@ -113,7 +111,7 @@ def text_summarization(html_content, investment, company):
         messages=[
             {
                 "role": "system", 
-                "content": "당신은 RAG 시스템을 위한 요약가입니다."
+                "content": "당신은 RAG 시스템을 위한 요약가입니다. RAG 시스템을 위해 검색 엔진이 연관 문서를 잘 검색할 수 있도록 text를 요약해야 합니다."
             },
             {
                 "role": "user", 
@@ -121,15 +119,13 @@ def text_summarization(html_content, investment, company):
                 다음은 {investment}의 {company}에 대한 리포트 중 일부입니다.
                 주어진 글에 대해 Retrieval을 위한 요약을 200자 이내로 작성하세요.
                 요약에 회사 이름을 반드시 포함하세요.
-                마크다운 문법으로 작성하세요.
 
                 [원문]
                 {html_content}
 
                 [출력 형식]
-                글에 대한 요약
                 
-                요약 :
+                요약 : [글에 대한 요약]
                 """
             }
         ],
@@ -159,24 +155,22 @@ def text_summarization_Hyperclova(html_content, investment, company):
     preset_text = [
         {
             "role": "system", 
-            "content": "당신은 RAG 시스템을 위한 요약가입니다."
+            "content": "당신은 RAG 시스템을 위한 요약가입니다. RAG 시스템을 위해 검색 엔진이 연관 문서를 잘 검색할 수 있도록 text를 요약해야 합니다."
         },
         {
-            "role": "user", 
-            "content": f"""
-            다음은 {investment}의 {company}에 대한 리포트 중 일부입니다.
-            주어진 글에 대해 Retrieval을 위한 요약을 200자 이내로 작성하세요.
-            요약에 회사 이름을 반드시 포함하세요.
-            마크다운 문법으로 작성하세요.
+                "role": "user", 
+                "content": f"""
+                다음은 {investment}의 {company}에 대한 리포트 중 일부입니다.
+                주어진 글에 대해 Retrieval을 위한 요약을 200자 이내로 작성하세요.
+                요약에 회사 이름을 반드시 포함하세요.
 
-            [원문]
-            {html_content}
+                [원문]
+                {html_content}
 
-            [출력 형식]
-            글에 대한 요약
-
-            요약 :
-            """
+                [출력 형식]
+                
+                요약 : [글에 대한 요약]
+                """
         }
     ]
 
