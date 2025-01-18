@@ -95,5 +95,5 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
         soup = BeautifulSoup(html, 'html.parser')
         return soup.get_text(separator=" ", strip=True)
 
-    result['original_content'].apply(lambda x: html_to_content(x))
+    result['original_content'] = result['original_content'].apply(html_to_content)
     return result
