@@ -13,7 +13,7 @@ df = pd.DataFrame()
 for route in routes:
     df = pd.concat([df, pd.read_csv(route)])
 
-print(df[0])
+print(df.head(1))
 
 paragraphs = df[df['type'] == 'paragraph']
 paragraphs = paragraphs.reset_index(drop = True)
@@ -95,16 +95,17 @@ def extract_qa(qa_text):
         return None, None
     
     try:
-        lines = qa_text.split('\n')
-        question = None
-        answer = None
+        parts = qa_text.split('답변:', 1)
         
-        for line in lines:
-            if line.startswith('질문 :'):
-                question = line.replace('질문 :', '').strip()
-            elif line.startswith('답변 :'):
-                answer = line.replace('답변 :', '').strip()
-                
+        if len(parts) != 2:
+            return None, None
+        
+        question_part, answer = parts
+        
+        # '질문:' 제거
+        question = question_part.replace('질문:', '').strip()
+        answer = answer.strip()
+        
         return question, answer
     except:
         return None, None
@@ -134,5 +135,5 @@ for idx in tqdm(range(len(source))):
     print("\n작성기관:", results[-1]['investment'])
 
 result_df = pd.DataFrame(results)
-result_df.to_csv('qa_validation_dataset.csv', index=False, encoding='utf-8-sig')
-print("Dataset has been saved to 'qa_validation_dataset.csv'")
+result_df.to_csv('qa_validation_dataset_2.csv', index=False, encoding='utf-8-sig')
+print("Dataset has been saved to 'qa_validation_dataset_2.csv'")
