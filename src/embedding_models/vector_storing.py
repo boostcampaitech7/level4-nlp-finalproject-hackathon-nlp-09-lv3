@@ -1,13 +1,12 @@
 import os
 import pandas as pd
-from navercloud_embedding import get_text_embedding
+from embedding_models.navercloud_embedding import get_text_embedding
 from chromadb import Client
 from chromadb.config import Settings
 from langchain.embeddings.base import Embeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain.llms import OpenAI
 
 
 class CSVToChromaDB:
