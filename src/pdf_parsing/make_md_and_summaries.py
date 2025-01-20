@@ -87,7 +87,6 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
     result = pd.DataFrame(summaries)
     csv_route = os.path.join(dir_route, file_name + '.csv')
     result['summary'] = result['summary'].apply(lambda x: x[x.find(':')+1:].lstrip())
-    result.to_csv(csv_route, index = False)
 
     def html_to_content(html):
         if not isinstance(html, str):  # 입력이 문자열이 아닌 경우
@@ -96,4 +95,5 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
         return soup.get_text(separator=" ", strip=True)
 
     result['original_content'] = result['original_content'].apply(html_to_content)
+    result.to_csv(csv_route, index = False)
     return result
