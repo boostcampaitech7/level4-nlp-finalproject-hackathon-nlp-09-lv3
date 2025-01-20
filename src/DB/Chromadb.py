@@ -9,16 +9,14 @@ from langchain.vectorstores import Chroma
 
 
 class ChromaDB:
-    def __init__(self, base_dir: str, collection_name: str):
+    def __init__(self, collection_name: str):
         """
         Initialize the CSVToChromaDB class.
         
         :param base_dir: The base directory containing the data.
         :param collection_name: The name of the ChromaDB collection.
         """
-        self.base_dir = base_dir
         self.collection_name = collection_name
-        self.chroma_client = Client()
 
 
     def add_docs(self, documents):
