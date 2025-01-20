@@ -1,65 +1,142 @@
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
 import chromadb
+import csv
+import os
+from embedding_models.navercloud_embedding import get_text_embedding
+from langchain.embeddings.base import Embeddings
 
-# Chroma 클라이언트 초기화
-client = chromadb.Client()  # 더 이상 Settings를 명시적으로 전달하지 않음
 
-# 컬렉션 생성 또는 가져오기
-collection_name = "text_data"
-collection = client.get_or_create_collection(name=collection_name)
-
-# CSV 파일 경로
-csv_file = r"C:\Users\seohy\Desktop\boostcamp_AITech\LabQ\level4-nlp-finalproject-hackathon-nlp-09-lv3\datas\CJ제일배당_교보증권(2024.11.13)\CJ제일배당_교보증권(2024.11.13).csv"  # 사용자가 업로드한 파일 경로
-
-# CSV 데이터 읽기
-df = pd.read_csv(csv_file)
-
-# 텍스트 데이터 준비
-text_data = df['summary'].fillna('') if 'summary' in df.columns else df['original_content'].fillna('')
-
-# TF-IDF 벡터화
-vectorizer = TfidfVectorizer(max_features=300)  # 최대 300개의 차원으로 제한
-embeddings = vectorizer.fit_transform(text_data).toarray()
-
-# Chroma DB에 데이터 저장
-for index, embedding in enumerate(embeddings):
-    document_id = str(df.loc[index, 'id'])  # 고유 ID
-    metadata = df.loc[index].to_dict()  # 메타데이터로 저장
+class EmbeddingProcessor(Embeddings):
+    def embed_query(self, query: str) -> list:
+        return get_text_embedding(query)
     
-    collection.add(
-        embeddings=[embedding],
-        metadatas=[metadata],
-        ids=[document_id]
-    )
-
-print(f"데이터 {len(df)}개가 Chroma DB에 저장되었습니다.")
+    def embed_documents(self, documents: list) -> list:
+        return [get_text_embedding(doc) for doc in documents]
 
 
-def search_similar_documents(query, collection, vectorizer):
-    # 쿼리 문장 벡터화
-    query_vector = vectorizer.transform([query]).toarray()  # 쿼리 문장을 벡터로 변환
+class ChromaDBHandler:
+    """
+    ChromaDB와의 상호작용을 담당하는 클래스입니다.
+    """
+    def __init__(self, collection_name: str):
+        # ChromaDB 클라이언트를 초기화하고, 지정된 컬렉션을 불러옵니다.
+        self.client = chromadb.Client()
+        self.collection = self.client.get_or_create_collection(collection_name)
     
-    # 저장된 임베딩 벡터의 차원과 일치하도록 query_vector를 맞춥니다.
-    if query_vector.shape[1] != 300:
-        print(f"쿼리 벡터 차원이 다릅니다: {query_vector.shape[1]}")
-        return
+    def add_document(self, document: str, embedding: list, metadata: dict):
+        """
+        텍스트 문서와 임베딩 벡터, 메타데이터를 ChromaDB에 추가합니다.
+        """
+        self.collection.add(
+            documents=[document],
+            metadatas=[metadata],
+            embeddings=[embedding]
+        )
     
-    # Chroma DB에서 유사도 검색
-    results = collection.query(query_embeddings=query_vector.tolist(), n_results=5)
-    
-    # 검색된 문서 출력
-    print(f"쿼리: {query}\n")
-    
-    if not results['documents']:
-        print("검색된 문서가 없습니다.")
-        return
-    
-    print(len(results))
-    print(results)
+    def get_all_documents(self):
+        """
+        컬렉션에서 모든 문서를 조회하여 반환합니다.
+        """
+        return self.collection.get()
 
-# 검색할 쿼리 문장
-query_text = 'CJ제일제당의 시가총액'
 
-# Chroma DB에서 유사한 문서 검색
-search_similar_documents(query_text, collection, vectorizer)
+class CSVProcessor:
+    """
+    CSV 파일을 처리하고, 데이터를 ChromaDB에 추가하는 클래스입니다.
+    """
+    def __init__(self, embedding_processor: EmbeddingProcessor, db_handler: ChromaDBHandler):
+        self.embedding_processor = embedding_processor
+        self.db_handler = db_handler
+    
+    def process_csv_file(self, file_path: str):
+        """
+        단일 CSV 파일을 처리하여 문서를 ChromaDB에 추가합니다.
+        """
+        with open(file_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                summary = row['summary']
+                embedding = self.embedding_processor.embed_query(summary)
+                
+                # 메타데이터 필드 추가
+                metadata = {
+                    'id': row['id'],
+                    'type': row['type'],
+                    'image_route': row['image_route'],
+                    'dir_route': row['dir_route'],
+                    'file_name': os.path.basename(file_path),
+                    'page': row['page'],
+                    'investment': row['investment'],
+                    'company_name': row['company_name'],
+                    'table': row['table'],
+                    'original_content': row['original_content']
+                }
+                
+                # 문서 추가
+                self.db_handler.add_document(summary, embedding, metadata)
+    
+    def process_all_files(self, directory_path: str):
+        """
+        지정된 디렉토리 및 하위 디렉토리 내 모든 CSV 파일을 처리하여 데이터를 ChromaDB에 추가합니다.
+        """
+        # os.walk()를 사용하여 모든 하위 디렉토리와 파일을 순회
+        for root, _, files in os.walk(directory_path):
+            for filename in files:
+                if filename.endswith('.csv'):
+                    # 각 CSV 파일의 전체 경로 생성
+                    file_path = os.path.join(root, filename)
+                    self.process_csv_file(file_path)
+
+
+class Retriever:
+    """
+    ChromaDB에서 관련 문서를 검색하는 클래스를 정의합니다.
+    """
+    def __init__(self, db_handler: ChromaDBHandler, embedding_processor: EmbeddingProcessor):
+        self.db_handler = db_handler
+        self.embedding_processor = embedding_processor
+    
+    def setup_retrieval(self):
+        """
+        LangChain을 사용하여 ChromaDB와 연결된 검색 시스템을 설정합니다.
+        """
+        # ChromaDB에서 벡터 저장소를 불러오기
+        vectorstore = chromadb.Chroma.from_documents(self.db_handler.get_all_documents()['documents'], self.embedding_processor)
+        
+        # LangChain의 retriever 설정 (k=5로 상위 5개 문서 반환)
+        retriever = vectorstore.as_retriever(k=5)
+        return retriever
+    
+    def query(self, query: str):
+        """
+        사용자가 입력한 쿼리 텍스트에 대해 관련된 문서를 검색하여 반환합니다.
+        """
+        retriever = self.setup_retrieval()
+        result = retriever.get_relevant_documents(query)
+        return result
+
+
+def main():
+    """
+    전체 시스템 흐름을 실행하는 함수입니다.
+    """
+    # 각 클래스 인스턴스 생성
+    embedding_processor = EmbeddingProcessor()
+    db_handler = ChromaDBHandler(collection_name="documents")
+    csv_processor = CSVProcessor(embedding_processor, db_handler)
+    retriever = Retriever(db_handler, embedding_processor)
+
+    # 지정된 디렉토리에서 CSV 파일 처리
+    csv_processor.process_all_files('/path/to/csv_files')
+
+    # 예시 쿼리 실행
+    query = "특정 텍스트에 대한 검색 쿼리"
+    results = retriever.query(query)
+
+    # 검색 결과 출력
+    for result in results:
+        print(result)
+
+
+# 실행
+if __name__ == "__main__":
+    main()
