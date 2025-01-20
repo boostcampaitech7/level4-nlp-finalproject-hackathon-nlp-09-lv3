@@ -1,10 +1,12 @@
 import http.client
 import json
 import os
+import pandas as pd
 from dotenv import load_dotenv
 from langchain.embeddings.base import Embeddings
 
 load_dotenv()
+
 def get_text_embedding(text):
     """
     HyperClova API를 사용하여 텍스트 임베딩을 생성합니다.
