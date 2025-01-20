@@ -2,6 +2,8 @@ import http.client
 import json
 import os
 from dotenv import load_dotenv
+from langchain.embeddings.base import Embeddings
+
 load_dotenv()
 def get_text_embedding(text):
     """
@@ -49,3 +51,12 @@ def get_text_embedding(text):
 
     except Exception as e:
         return f"Error: {str(e)}"
+    
+class NaverCloud_EmbeddingModel(Embeddings):
+
+    """Custom embeddings class wrapping the embedding function."""
+    def embed_query(self, text: str) -> list[float]:
+        return get_text_embedding(text)
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return [get_text_embedding(text) for text in texts]
