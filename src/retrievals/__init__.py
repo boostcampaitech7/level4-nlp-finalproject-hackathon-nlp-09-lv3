@@ -8,4 +8,5 @@ ensemble = ensemble_retrieval
 __all__ = [
     "bm25",  # BM25Search를 bm25라는 이름으로 내보냄
     "dpr",    # DPRRetriever를 dpr이라는 이름으로 내보냄
+    'ensemble'
 ]
