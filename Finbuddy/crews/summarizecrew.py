@@ -45,12 +45,12 @@ class SummarizeCrew:
     def summarization_crew(self) -> Crew:
         return Crew(
             agents = [
-                self.news_collector(),
-                self.news_summarizer(),
+                self.news_collector,
+                self.news_summarizer,
             ],
             tasks = [
-                self.news_collect(),
-                self.news_summarize(),
+                self.news_collect,
+                self.news_summarize,
             ],
             process = Process.sequential
         )

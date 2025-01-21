@@ -1,0 +1,38 @@
+# visualization_task:
+#   description: >
+#     데이터가 주어지면 사용자가 알아보기 쉽게 시각화하는 도구입니다.
+#   expected_output: >
+#     주어진 데이터에 대한 시각화된 그래프
+#   agent: visualization_agent
+
+# news_collectiong_task:
+#   description: >
+#     주어진 토픽에 대한 가장 관련성 있는 뉴스를 검색합니다.
+#   expected_output: >
+#     주어진 토픽에 대한 관련성 높은 뉴스 5개
+#   agent: news_collector_agent
+
+# summarization_task:
+#   description: >
+#     주어진 뉴스 정보들을 요약합니다.
+#   expected_output: >
+#     주어진 뉴스의 중요한 정보만을 담은 200자 이내의 요약
+#   agent: summary_agent
+
+search_task:
+  description: > 
+    최신 AI 및 데이터사이언스의 연구 동향을 찾고 내용을 가져오세요.
+    Key trends와 획기적인 기술, 산업의 잠재성을 함께 기술하세요.
+    당신의 대답은 반드시 full analysis report여야 합니다.
+  expected_output: >
+    AI와 데이터사이언스의 최신 연구 동향에 대한 상세한 분석 리포트
+  agent: researcher
+
+write_task:
+  description: >
+    제공된 정보들을 바탕으로 최신 AI 트렌드를 강조하는 블로그 포스트를 작성하세요.
+    당신의 포스트는 유용한 정보를 담고 있어야 하며, AI에 대해 잘 모르는 일반인도 이해할 수 있어야 합니다.
+    최종 답변은 반드시 2개 이상의 paragraph를 담고 있는 완전한 블로그 포스트여야 합니다.
+  expected_output: >
+    일반인도 이해하기 쉬운 AI 트렌드 블로그 포스트
+  agent: writer

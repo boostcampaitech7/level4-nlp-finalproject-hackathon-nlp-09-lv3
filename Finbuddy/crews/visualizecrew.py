@@ -30,10 +30,10 @@ class VisualizeCrew:
     def visualization_crew(self) -> Crew:
         return Crew(
             agents = [
-                self.visualator()
+                self.visualator
             ],
             tasks = [
-                self.visualize()
+                self.visualize
             ],
             process = Process.sequential
         )
