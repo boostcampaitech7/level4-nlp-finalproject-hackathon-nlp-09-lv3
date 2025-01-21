@@ -1,40 +1,16 @@
-from typing import List
-from langchain_core.callbacks import CallbackManagerForRetrieverRun
-from langchain_core.documents import Document
-from langchain_core.retrievers import BaseRetriever
-from rank_bm25 import BM25Okapi
 from kiwipiepy import Kiwi
+from langchain_community.retrievers import BM25Retriever
 
-
-class BM25Search(BaseRetriever):
-    def __init__(self, documents: List[Document], k: int = 5, mode = 'kiwi'):
-        self.documents = documents
-        self.k = k
+class BM25Search:
+    def __init__(self, mode = 'kiwi'):
         if mode == 'kiwi':
-            kiwi = Kiwi()
-            self.tokenize_fn = kiwi.tokenize
-        self.bm25 = self.__initialize_bm25()
+            # Kiwi 형태소 분석기 설정
+            self.kiwi = Kiwi()
 
-    def _initialize_bm25(self):
-        # 토큰화된 문서 리스트를 BM25에 입력
-
-        tokenized_corpus = [[token.form for token in self.tokenize_fn(doc.page_content.lower())]for doc in self.documents]
-
-        return BM25Okapi(tokenized_corpus)
-    
-    def _get_relevant_documents(
-        self, query: str, *, run_manager: CallbackManagerForRetrieverRun = None
-    ) -> List[Document]:
-        # 쿼리 토큰화
-        tokenized_query = [token.form for token in self.tokenize_fn(query.lower())]
-        
-        # BM25 점수 계산
-        scores = self.bm25.get_scores(tokenized_query)
-        
-        # 가장 높은 k개의 문서 선택
-        top_indices = sorted(
-            range(len(scores)), key=lambda i: scores[i], reverse=True
-        )[:self.k]
-        
-        matching_documents = [self.documents[i] for i in top_indices]
-        return matching_documents
+    # 형태소 분석을 통해 문서를 토큰화하는 함수
+    def kiwi_tokenize(self, text):
+        return [token.form for token in self.kiwi.tokenize(text)]
+    # bm25 리트리버를 내보냅니다.
+    def bm25_retriever(self, documents, topk = 5):
+        kiwi_bm25 = BM25Retriever.from_documents(documents, preprocess_func=self.kiwi_tokenize, k = topk)
+        return kiwi_bm25

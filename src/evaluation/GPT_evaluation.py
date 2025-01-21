@@ -2,7 +2,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
-def evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer):
+def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer):
     load_dotenv()
     api_key = os.environ['OPENAI_API_KEY']
     client = OpenAI(api_key=api_key)

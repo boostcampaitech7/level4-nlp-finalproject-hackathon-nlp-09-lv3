@@ -3,6 +3,8 @@ import json
 import os
 import pandas as pd
 from dotenv import load_dotenv
+from langchain.embeddings.base import Embeddings
+
 load_dotenv()
 
 def get_text_embedding(text):
@@ -52,36 +54,11 @@ def get_text_embedding(text):
     except Exception as e:
         return f"Error: {str(e)}"
     
-def process_csv_and_generate_embeddings(input_csv_path, output_csv_path):
-    """
-    CSV 파일의 summary 컬럼에 대해 임베딩을 생성하고 결과를 저장합니다.
+class NaverCloud_EmbeddingModel(Embeddings):
 
-    Args:
-        input_csv_path (str): 입력 CSV 파일 경로.
-        output_csv_path (str): 결과를 저장할 CSV 파일 경로.
-    """
-    # CSV 파일 읽기
-    df = pd.read_csv(input_csv_path)
+    """Custom embeddings class wrapping the embedding function."""
+    def embed_query(self, text: str) -> list[float]:
+        return get_text_embedding(text)
 
-    # summary 컬럼 확인
-    if 'summary' not in df.columns:
-        print("Error: 'summary' 컬럼이 CSV 파일에 없습니다.")
-        return
-
-    # summary 컬럼의 임베딩 생성
-    embeddings = []
-    for i, text in enumerate(df['summary']):
-        if isinstance(text, str):  # 유효한 문자열인지 확인
-            print(f"Processing row {i + 1}/{len(df)}: {text[:30]}...")  # 진행 상황 출력
-            embedding = get_text_embedding(text)
-            embeddings.append(embedding)
-        else:
-            embeddings.append(None)  # 비어 있는 값은 None으로 처리
-
-    # 결과를 데이터프레임에 추가
-    df['embedding'] = embeddings
-
-    # 결과 저장
-    df.to_csv(output_csv_path, index=False)
-    print(f"임베딩 생성 완료. 결과가 {output_csv_path}에 저장되었습니다.")
-
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return [get_text_embedding(text) for text in texts]
