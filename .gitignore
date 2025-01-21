@@ -2,3 +2,4 @@ datas
 pdfs
 .env
 __pycache__
+chroma.sqlite3
