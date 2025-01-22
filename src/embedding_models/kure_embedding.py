@@ -18,8 +18,8 @@ def get_text_embedding(text):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         # KURE 모델과 토크나이저 로드
-        tokenizer = AutoTokenizer.from_pretrained("nlpai-lab/kure-base")
-        model = AutoModel.from_pretrained("nlpai-lab/kure-base").to(device)  # 모델을 GPU로 이동
+        tokenizer = AutoTokenizer.from_pretrained("nlpai-lab/KURE-v1")
+        model = AutoModel.from_pretrained("nlpai-lab/KURE-v1").to(device)  # 모델을 GPU로 이동
 
         # 입력 텍스트를 토큰화
         inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
