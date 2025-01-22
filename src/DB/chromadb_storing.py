@@ -4,6 +4,7 @@ import numpy as np
 from embedding_models.navercloud_embedding import NaverCloud_EmbeddingModel
 from embedding_models.kf_deberta_embedding import KF_DeBERTa_EmbeddingModel
 from embedding_models.kure_embedding import KURE_EmbeddingModel
+from embedding_models.openai_embedding import OpenAI_EmbeddingModel
 from chromadb import Client
 from langchain.vectorstores import Chroma
 from langchain.schema import Document 
@@ -30,6 +31,9 @@ class ChromaDB:
         elif mode == 'Kure_Emb':
             self.embedding_function = KURE_EmbeddingModel()
             self.persist_directory += '/DB_Kure_Emb'
+        elif mode == 'OpenAI_Emb':
+            self.embedding_function = OpenAI_EmbeddingModel()
+            self.persist_directory += '/OpenAI_Emb'
         else:
             print('''가능한 임베딩 모델이 아닙니다.
                   [가능한 모델]
