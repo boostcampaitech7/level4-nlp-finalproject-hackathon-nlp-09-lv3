@@ -4,85 +4,81 @@ import numpy as np
 from embedding_models.navercloud_embedding import NaverCloud_EmbeddingModel
 from chromadb import Client
 from langchain.vectorstores import Chroma
+from langchain.schema import Document 
 
 
 class ChromaDB:
-    def __init__(self, collection_name: str):
+    def __init__(self, collection_name: str, persist_directory: str):
         """
-        Initialize the CSVToChromaDB class.
+        Initialize the ChromaDB class.
         
-        :param base_dir: The base directory containing the data.
         :param collection_name: The name of the ChromaDB collection.
+        :param persist_directory: Directory to store the ChromaDB collection.
         """
-        # self.base_dir = base_dir
         self.collection_name = collection_name
-        self.chroma_client = Client()
+        self.persist_directory = persist_directory
         self.db = None
 
-    def add_docs(self, documents):
+    def create_and_add(self, documents):
+        """
+        Add a list of documents to ChromaDB after embedding.
         
-        # 한번에 넣으면 오류나서 배치처리
-        batch_size = len(documents) // 4
-        batches = [
-            documents[i * batch_size: (i + 1) * batch_size] for i in range(4)
-        ]
+        :param documents: List of langchain.schema.Document objects.
+        """
+        if not isinstance(documents, list) or not all(isinstance(doc, Document) for doc in documents):
+            raise ValueError("Input must be a list of langchain.schema.Document objects.")
         
-        if len(documents) % 4 != 0:
-            batches[-1].extend(documents[batch_size * 4:])
+        print(f"Received {len(documents)} documents for embedding.")
+        
+        # Create ChromaDB collection
+        self.db = Chroma(
+            collection_name=self.collection_name,
+            persist_directory=self.persist_directory,
+            embedding_function=NaverCloud_EmbeddingModel()
+        )
+        
+        # Add documents in batches
+        batch_size = 100
+        for i in range(0, len(documents), batch_size):
+            batch = documents[i:i + batch_size]
+            print(f"Adding batch {i // batch_size + 1} of {len(documents) // batch_size + 1}...")
+            self.db.add_documents(batch)
+            time.sleep(5)  # To ensure stability during persistence
+        
+        # Persist the database
+        self.db.persist()
+        print(f"Collection '{self.collection_name}' created and persisted at '{self.persist_directory}'.")
 
-        if len(documents) <= 100:
-            batches = [documents]
-
-        for batch in batches:
-            self.db = Chroma.from_documents(
-                documents=batch,
-                embedding=NaverCloud_EmbeddingModel(),
-                collection_name=self.collection_name
-            )
-            time.sleep(10)
-        
     def verify_db(self):
         """
         Verify the data in the ChromaDB collection.
         
         :return: Total number of documents in the collection.
         """
-        all_data = self.db.get(include=["documents", "metadatas", "embeddings"])
-        total_documents = len(all_data['documents'])
-        print(f"Total documents in collection '{self.collection_name}': {total_documents}")
-        return self.db
-
-    def save_collection(self, save_dir="/data/ephemeral/home/level4-nlp-finalproject-hackathon-nlp-09-lv3/data/db"):
-        """
-        Save the current ChromaDB collection to disk.
-        
-        :param save_dir: Directory where the collection will be saved.
-        """
         if self.db is None:
-            raise ValueError("No database loaded to save. Please add documents first.")
+            print("No database loaded.")
+            return None
         
-        save_path = os.path.join(save_dir, self.collection_name)
-        os.makedirs(save_path, exist_ok=True)
-        
-        # Set the persist directory
-        self.db.persist_directory = save_path
+        try:
+            data = self.db.get(include=["documents"])
+            total_documents = len(data["documents"])
+            print(f"Total documents in collection '{self.collection_name}': {total_documents}")
+            return self.db
+        except Exception as e:
+            print(f"Error during verification: {e}")
+            return None
 
-        # Call persist without arguments
-        self.db.persist()
-        print(f"Collection '{self.collection_name}' saved at: {save_path}")
-    
-    def load_collection(self, load_dir="/data/ephemeral/home/level4-nlp-finalproject-hackathon-nlp-09-lv3/data/db"):
+    def load_collection(self):
         """
-        Load a ChromaDB collection from disk.
-        
-        :param load_dir: Directory where the collection is saved.
+        Load the ChromaDB collection from disk.
         """
-        load_path = os.path.join(load_dir, self.collection_name)
-        if not os.path.exists(load_path):
-            raise FileNotFoundError(f"Collection directory does not exist at: {load_path}")
+        if not os.path.exists(self.persist_directory):
+            raise FileNotFoundError(f"Persist directory does not exist at: {self.persist_directory}")
         
         self.db = Chroma(
-            persist_directory=load_path,
+            collection_name=self.collection_name,
+            persist_directory=self.persist_directory,
             embedding_function=NaverCloud_EmbeddingModel()
         )
-        print(f"Collection '{self.collection_name}' loaded from: {load_path}")
+        print(f"Collection '{self.collection_name}' loaded from '{self.persist_directory}'.")
+
