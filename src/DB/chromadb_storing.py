@@ -63,7 +63,7 @@ class ChromaDB:
             data = self.db.get(include=["documents"])
             total_documents = len(data["documents"])
             print(f"Total documents in collection '{self.collection_name}': {total_documents}")
-            return total_documents
+            return self.db
         except Exception as e:
             print(f"Error during verification: {e}")
             return None
