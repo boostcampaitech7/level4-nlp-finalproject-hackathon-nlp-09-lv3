@@ -20,6 +20,8 @@ def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer)
                 2. **Generation Evaluation (30 points)**: Assess the quality, accuracy, and presentation of the system-generated answer.
 
                 Each evaluation criterion has a weight associated with it. Assign "Yes" (full points) or "No" (0 points) for each criterion and provide a short justification for your assessment.
+                
+                At the end of the evaluation, calculate the Total Score (sum of Retrieval Evaluation and Generation Evaluation) and provide it as output. Only output the Total Score.
                 """
             },
             {
