@@ -19,61 +19,76 @@
 #     주어진 뉴스의 중요한 정보만을 담은 200자 이내의 요약
 #   agent: summary_agent
 
-# search_task:
-#   description: > 
-#     최신 AI 및 데이터사이언스의 연구 동향을 찾고 내용을 가져오세요.
-#     Key trends와 획기적인 기술, 산업의 잠재성을 함께 기술하세요.
-#     당신의 대답은 반드시 full analysis report여야 합니다.
-#   expected_output: >
-#     AI와 데이터사이언스의 최신 연구 동향에 대한 상세한 분석 리포트
-#   agent: researcher
+search_task:
+  description: > 
+    최신 AI 및 데이터사이언스의 연구 동향을 찾고 내용을 가져오세요.
+    Key trends와 획기적인 기술, 산업의 잠재성을 함께 기술하세요.
+    당신의 대답은 반드시 full analysis report여야 합니다.
+  expected_output: >
+    AI와 데이터사이언스의 최신 연구 동향에 대한 상세한 분석 리포트
+  agent: researcher
 
-# write_task:
+write_task:
+  description: >
+    제공된 정보들을 바탕으로 최신 AI 트렌드를 강조하는 블로그 포스트를 작성하세요.
+    당신의 포스트는 유용한 정보를 담고 있어야 하며, AI에 대해 잘 모르는 일반인도 이해할 수 있어야 합니다.
+    최종 답변은 반드시 2개 이상의 paragraph를 담고 있는 완전한 블로그 포스트여야 합니다.
+  expected_output: >
+    일반인도 이해하기 쉬운 AI 트렌드 블로그 포스트
+  agent: writer
+
+# analyze_task:
 #   description: >
-#     제공된 정보들을 바탕으로 최신 AI 트렌드를 강조하는 블로그 포스트를 작성하세요.
-#     당신의 포스트는 유용한 정보를 담고 있어야 하며, AI에 대해 잘 모르는 일반인도 이해할 수 있어야 합니다.
-#     최종 답변은 반드시 2개 이상의 paragraph를 담고 있는 완전한 블로그 포스트여야 합니다.
+#     테이블 데이터를 분석하고, 데이터 요약 및 통찰을 생성하는 작업입니다. 
+#     이 작업에서는 통합된 테이블 데이터를 바탕으로 목표 주가, 변동성 등의 주요 정보를 요약합니다.
 #   expected_output: >
-#     일반인도 이해하기 쉬운 AI 트렌드 블로그 포스트
-#   agent: writer
+#     증권사별 기업 분석 요약 (예: 목표 주가 평균, 최대값, 최소값) 및 통합된 테이블 데이터
+#   agent: table_analysis_agent
 
-process_retrieval_results:
-  description: >
-    Retrieval 결과를 Table, Graph, Context 분석가로 분배
-  agent: retrieval_scheduler
+# convert_task:
+#   description: >
+#     사용자가 제공한 마크다운 형식의 테이블 데이터를 pandas 데이터프레임으로 변환하는 작업입니다. 
+#     데이터의 정리 및 표준화도 포함됩니다.
+#   expected_output: >
+#     데이터프레임 형식으로 변환된 테이블 데이터
+#   agent: table_conversion_agent
 
-analyze_table:
-  description: >
-    Table 데이터를 분석하고 Dataframe으로 변환
-  expected_output: >
-    Table의 데이터를 포함하는 Dataframe
-  agent: table_analyzer
+# visualize_task:
+#   description: >
+#     분석된 데이터를 기반으로 막대그래프, 꺾은선그래프 등 시각화를 생성하는 작업입니다.
+#     사용자가 쉽게 데이터를 이해할 수 있도록 시각적 자료를 제공합니다.
+#   expected_output: >
+#     생성된 그래프와 그래프의 파일 경로 (예: PNG 또는 JPEG 포맷) 출력
+#   agent: table_visualization_agent
 
-analyze_graph:
-  description: >
-    Graph 이미지를 분석하여 유용한 정보를 추출
-  expected_output: >
-    주어진 Graph에 나타난 정보에 대한 150자 이내의 글
-  agent: graph_analyzer
 
-analyze_context:
-  description: >
-    Context 데이터를 분석하여 최종 답변에 활용
-  expected_output: >
-    주어진 context에 대해 정리한 150자 이내의 글
-  agent: context_analyzer
 
-visualize_table:
-  description: >
-    Dataframe 데이터를 시각화
-  expected_output: >
-    보기 쉽게 시각화된 Dataframe
-  agent: visualizer
+# visualization_task:
+#   description: >
+#     주어진 데이터와 요청에 맞게 시각화 작업을 수행합니다.
+#     사용자가 요청한 그래프, 테이블 또는 데이터프레임을 시각적으로 표현합니다.
+#   goal: >
+#     데이터를 시각적으로 표현하여 사용자가 쉽게 이해할 수 있도록 합니다.
+#   expected_output: >
+#     요구 사항에 맞는 시각화된 그래프, 테이블 또는 데이터프레임
+#   agent: graph_agent
 
-generate_final_answer:
-  description: >
-    모든 정보를 종합하여 사용자에게 답변 제공
-  expected_output: >
-    사용자가 이해하기 쉽게 작성된 종합 답변
-  agent: final_answer_agent
-  
+
+# table_task:
+#   description: >
+#     주어진 데이터를 테이블 형식으로 변환하여 시각화합니다.
+#     표의 스타일과 필요한 옵션들을 조정하여 출력합니다.
+#   goal: >
+#     테이블 형식으로 데이터를 시각적으로 표현하여 사용자가 쉽게 파악할 수 있도록 합니다.
+#   expected_output: >
+#     요구 사항에 맞는 시각화된 테이블
+#   agent: table_agent
+
+# dataframe_task:
+#   description: >
+#     주어진 데이터프레임을 받아 원하는 형식으로 시각화하여 결과를 출력합니다.
+#   goal: >
+#     데이터프레임을 시각적으로 표현하여 중요한 인사이트를 도출합니다.
+#   expected_output: >
+#     요구 사항에 맞는 시각화된 데이터프레임
+#   agent: dataframe_agent
