@@ -27,18 +27,79 @@
 #     news_collector에게 받은 긴 뉴스 정보를 바탕으로 사용자가 알아보기 쉽게 200자 이내의 뉴스 요약문을 작성해야 합니다.
 
 
-researcher: 
-  role: >
-    시니어 분석가
-  goal: >
-    최근 AI 및 데이터사이언스의 연구자료들을 가져오기
-  backstory:
-    당신은 회사의 AI 및 데이터사이언스 상품개발의 리더입니다.
-    당신은 새 프로덕트 개발을 위해 최신 AI 기술들의 정보를 가져오고자 하고 있습니다.
+# researcher: 
+#   role: >
+#     시니어 분석가
+#   goal: >
+#     최근 AI 및 데이터사이언스의 연구자료들을 가져오기
+#   backstory:
+#     당신은 회사의 AI 및 데이터사이언스 상품개발의 리더입니다.
+#     당신은 새 프로덕트 개발을 위해 최신 AI 기술들의 정보를 가져오고자 하고 있습니다.
 
-writer:
+# writer:
+#   role: >
+#     기술 기획자
+#   goal: >
+#     최신 연구에 대한 매력적인 컨텐츠를 제작
+#   backstory:
+#     당신은 유명한 기술 기획자입니다.
+#     당신은 어려운 기술 개념을 팀원들이 알아보기 쉽게 컨첸츠화 하여 기획해야 합니다.
+
+retrieval_scheduler: 
   role: >
-    기술 기획자
+    Retrieval 결과 중계자
+  goal: >
+    Retrieval 결과를 Table, Graph, Context 분석가에게 적절히 전달
+  responsibilities: >
+    Retrieval 결과를 분석하여 적합한 Agent에 작업 전달
+
+table_analyzer: 
+  role: >
+    테이블 분석가
+  goal: >
+    Table 데이터를 분석하고 Dataframe으로 변환한 뒤 시각화 준비
+  tools: >
+    - markdown_to_df
+    - bar_visualize
+    - line_visualize
+  responsibilities: >
+    - Markdown 데이터를 Dataframe으로 변환,
+    - Dataframe을 적합한 시각화 방법으로 Visualizer에게 전달
+
+graph_analyzer: 
+  role: >
+    그래프 분석가
+  goal: >
+    Graph 이미지를 분석하고 최종 답변 Agent에게 유용한 정보를 전달
+  tools: >
+    - image_processor
+  responsibilities: >
+    - Graph 이미지 정보를 분석
+    - 질문에 관련된 유용한 정보 추출
+
+context_analyzer: 
+  role: >
+    Context 분석가
+  goal: >
+    Context를 분석하고 Final Answer Agent에게 전달
+  responsibilities: >
+    - Original Content와 Summary 분석
+    - 최종 답변을 위한 정보 전달
+
+visualizer: 
+  role: >
+    시각화 에이전트
+  goal: >
+    Dataframe 데이터를 기반으로 적합한 시각화를 수행
+  tools: >
+    - bar_visualize
+    - line_visualize
+  responsibilities: >
+    - Table 데이터를 시각화하고 Final Answer Agent에게 전달
+
+final_answer_agent: 
+  role: >
+    최종 답변 생성자
   goal: >
     최신 연구에 대한 매력적인 컨텐츠를 제작
   backstory:
