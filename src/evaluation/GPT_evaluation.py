@@ -2,7 +2,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
-def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer):
+def G_retrieval_evaluate(query:str, retrieved_contexts:str):
     load_dotenv()
     api_key = os.environ['OPENAI_API_KEY']
     client = OpenAI(api_key=api_key)
@@ -14,14 +14,12 @@ def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer)
                 "content": 
                 """
                 ### Instruction:
-                You are tasked with evaluating a Retrieval-Augmented Generation (RAG) system. Your evaluation focuses on two components:
+                You are tasked with evaluating a Retrieval-Augmented Generation (RAG) system. Your evaluation focuses on one components:
 
                 1. **Retrieval Evaluation (20 points)**: Assess the relevance and quality of the retrieved contexts used to generate the final answer.
-                2. **Generation Evaluation (30 points)**: Assess the quality, accuracy, and presentation of the system-generated answer.
 
-                Each evaluation criterion has a weight associated with it. Assign "Yes" (full points) or "No" (0 points) for each criterion and provide a short justification for your assessment.
-                
-                At the end of the evaluation, calculate the Total Score (sum of Retrieval Evaluation and Generation Evaluation) and provide it as output. Only output the Total Score.
+                evaluation criterion has a weight associated with it. Assign "Yes" (full points) or "No" (0 points) for each criterion and provide a short justification for your assessment.
+
                 """
             },
             {
@@ -30,13 +28,8 @@ def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer)
                 ### Input:
                 **Query**: {query}
 
-                **Ground Truth Answer**: {ground_truth_answer}
-
                 **Retrieved Contexts**:
                 {retrieved_contexts}
-
-                **Generated Answer**:
-                {generated_answer}
 
                 ### Output:
 
@@ -60,7 +53,47 @@ def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer)
 
                 **Total Retrieval Score**: [ / 20]
 
-                ---
+                """
+            }
+        ],
+        temperature=0.0,
+    )
+
+    response_score = response.choices[0].message.content
+    return response_score
+
+
+def G_generation_evaluate(query:str, ground_truth_answer:str, generated_answer:str):
+    load_dotenv()
+    api_key = os.environ['OPENAI_API_KEY']
+    client = OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model='gpt-4o-mini',
+        messages=[
+            {
+                "role": "system", 
+                "content": 
+                """
+                ### Instruction:
+                You are tasked with evaluating a Retrieval-Augmented Generation (RAG) system. Your evaluation focuses on one components:
+
+                1. **Generation Evaluation (30 points)**: Assess the quality, accuracy, and presentation of the system-generated answer.
+
+                evaluation criterion has a weight associated with it. Assign "Yes" (full points) or "No" (0 points) for each criterion and provide a short justification for your assessment.
+                """
+            },
+            {
+                "role": "user", 
+                "content": f"""
+                ### Input:
+                **Query**: {query}
+
+                **Ground Truth Answer**: {ground_truth_answer}
+
+                **Generated Answer**:
+                {generated_answer}
+
+                ### Output:
 
                 #### 2. Generation Evaluation (30 points):
                 Evaluate the quality of the generated answer based on the following criteria:
@@ -94,11 +127,6 @@ def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer)
 
                 **Total Generation Score**: [ / 30]
 
-                ---
-
-                ### Final Output:
-                **Total Score**: [ / 50]
-
                 """
             }
         ],
@@ -107,3 +135,7 @@ def G_evaluate(query, retrieved_contexts, ground_truth_answer, generated_answer)
 
     response_score = response.choices[0].message.content
     return response_score
+
+
+
+

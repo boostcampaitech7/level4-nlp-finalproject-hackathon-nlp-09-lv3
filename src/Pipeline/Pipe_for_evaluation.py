@@ -1,12 +1,12 @@
+
 from DB.chromadb_storing import ChromaDB
 import pandas as pd
-from utils import get_only_paragraphs, get_all_datas, create_documents
+from utils import get_only_paragraphs, create_documents
 import os
 from retrievals import bm25, dpr, ensemble
-from QA_model.exaone_model import ExaoneModel
-from QA_model.qwen_model import QwenModel
-from QA_model.gpt_model import GPTModel
-from evaluation import G_evaluate
+from QA_model import GPTModel, Qwen14BModel, Qwen32BModel, ExaoneModel
+from tqdm import tqdm
+from evaluation import G_generation_evaluate, G_retrieval_evaluate
 
 class Pipeline_For_Eval:
     def __init__(self, 
@@ -20,6 +20,8 @@ class Pipeline_For_Eval:
         self.persist_directory = persist_directory
         folder_name = 'DB' + '_' + mode
         self.topk = topk
+        self.model = None
+
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
             print('생성된 DB가 있어 로드합니다.')
             DB = ChromaDB(collection_name, persist_directory, mode = mode)
@@ -46,7 +48,25 @@ class Pipeline_For_Eval:
         search_type = 'mmr'
         self.ensemble_retriever = ensemble(retrievals, topk = topk, weights = weights, search_type = search_type)
 
-    
+    def setup(self, model = 'GPT'):
+            if model == 'GPT':
+                self.model = GPTModel()
+            elif model == 'Qwen14B':
+                self.model = Qwen14BModel()
+            elif model == 'Qwen32B':
+                self.model = Qwen32BModel()
+            elif model == 'Exaone':
+                self.model = ExaoneModel()
+            else:
+                print('''가능한 모델을 입력하세용
+                    1. GPT
+                    2. Qwen
+                    3. Exaone
+                    4. Qwen14B
+                    5. Qwen32B
+                    ''')
+            self.model_name = model
+                
     def Q(self, query: str, mode = 'ensemble'):
         if mode == 'ensemble':
             result = self.ensemble_retriever.invoke(query)
@@ -66,7 +86,9 @@ class Pipeline_For_Eval:
                 print(i)
         return result[:self.topk]
     
-    def A(self, query, retrieval_results, model = 'GPT'):
+    def A(self, query, retrieval_results):
+        
+
         retrieval_results = [doc.metadata['original_content'] for doc in retrieval_results]
         documents = "\n".join(
         [f"참고 문서{idx + 1}: {doc.strip()}" for idx, doc in enumerate(retrieval_results)])
@@ -77,45 +99,62 @@ class Pipeline_For_Eval:
 정답:"""
         if self.verbose:
             print(prompt)
-        if model == 'GPT':
-            model = GPTModel()
-        elif model == 'Qwen':
-            model = QwenModel()
-        elif model == 'Exaone':
-            model = ExaoneModel()
-        else:
-            print('''가능한 모델을 입력하세용
-                  1. GPT
-                  2. Qwen
-                  3. Exaone
-                  ''')
-            return
         prompt.strip()
-        answer = model.answering(prompt)
+        answer = self.model.answering(prompt)
         if self.verbose:
             print(answer)
         return answer
     
-    def QA(self, query, mode = 'ensemble', model = 'GPT'):
+    def QA(self, query, mode = 'ensemble'):
         retrieval_results = self.Q(query, mode = mode)
-        answer = self.A(query, retrieval_results, model = model)
+        answer = self.A(query, retrieval_results,)
         return answer
 
-    def QA_eval(self, mode = 'ensemble', model = 'GPT'):
+    def QA_eval(self, mode = 'ensemble', sampling = True):
+
         eval_dataset = pd.read_csv('datas/validation_dataset.csv')
-        sample = eval_dataset.sample(1)
-        query = sample['question'].values[0]
-        print('[query]:', query)
-        print('----------'*10)
-        ground_truth_answer = sample['answer'].values[0]
+        if sampling:
+            sample = eval_dataset.sample(1)
+            query = sample['question'].values[0]
+            ground_truth_answer = sample['answer'].values[0]
         
-        retrieval_results = self.Q(query, mode = mode)
-        answer = self.A(query, retrieval_results, model = model)
-        score = G_evaluate(query, retrieval_results, ground_truth_answer, answer)
-        if self.verbose:
-            print('----------'*10)
-            print('[answer]:', answer)
-            print('----------'*10)
-            print('[score]')
-            print(score)
-        return answer, score
+            retrieval_results = self.Q(query, mode = mode)
+            G_retrieval_score = G_retrieval_evaluate(query, retrieval_results)
+            generated_answer = self.A(query, retrieval_results)
+            G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)
+            if self.verbose:
+                print('[query]:', query)
+                print('----------'*10)
+                print('----------'*10)
+                print('[answer]:', generated_answer)
+                print('----------'*10)
+                print('[Retrieval score]')
+                print(G_retrieval_score)
+                print('----------'*10)
+                print('[Generation score]')
+                print(G_generation_score)
+            return generated_answer, G_retrieval_score, G_generation_score
+        else:
+            self.verbose = False
+            generation_scores = []
+            retrieval_scores = []
+            
+            for idx, row in tqdm(eval_dataset.iterrows()):
+                query = row['question']
+                ground_truth_answer = row['answer']
+
+                retrieval_results = self.Q(query, mode = mode)
+                G_retrieval_score = G_retrieval_evaluate(query, retrieval_results)
+                retrieval_scores.append(G_retrieval_score)
+
+                generated_answer = self.A(query, retrieval_results)
+                G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)    
+                generation_scores.append(G_generation_score)
+
+            
+            eval_dataset['retrieval_score'] = retrieval_scores
+            eval_dataset['generation_score'] = generation_scores
+
+            print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
+            eval_dataset.to_csv(f'datas/g_eval_result_{self.model_name}.csv')
+            return eval_dataset

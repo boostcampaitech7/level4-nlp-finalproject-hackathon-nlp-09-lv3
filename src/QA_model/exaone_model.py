@@ -13,11 +13,24 @@ class ExaoneModel(BaseModel):
         )
 
     def answering(self, prompt: str) -> str:
-        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
-        outputs = self.model.generate(
-            **inputs,
-            max_new_tokens=512,
-            eos_token_id=self.tokenizer.eos_token_id,
-            do_sample=False
+        messages = [
+            {"role": "system", 
+            "content": """You are EXAONE model from LG AI Research, a helpful assistant. 
+            사용자의 지시에 맞게 질문에 답하세요."""},
+            {"role": "user", "content": prompt}
+        ]
+        input_ids = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=True,
+            add_generation_prompt=True,
+            return_tensors="pt"
         )
-        return self.tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+        outputs = self.model.generate(
+                    input_ids.to('cuda'),
+                    max_new_tokens=512,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    do_sample=False
+        )
+        answer = self.tokenizer.decode(outputs[0], skip_special_tokens = True, )
+        answer = answer[answer.find('[|assistant|]')+13:]
+        return answer

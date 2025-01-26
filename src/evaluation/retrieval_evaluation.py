@@ -25,7 +25,7 @@ def check_acc(retrieval, eval_dataset, k):
 
 def retrieval_evaluate(retrieval, eval_dataset, k=5):
     start_time = time.time()
-    acc = check_acc(retrieval, eval_dataset, k=5)
+    acc = check_acc(retrieval, eval_dataset, k=k)
     end_time = time.time()
     print('acc:', acc)
     print(f"{end_time - start_time:.6f} seconds")
