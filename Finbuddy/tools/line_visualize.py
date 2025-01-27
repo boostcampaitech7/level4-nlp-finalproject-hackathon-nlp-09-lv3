@@ -1,5 +1,7 @@
+from crewai.tools import tool
 import matplotlib.pyplot as plt
 
+@tool('line_visualize')
 def line_visualize(data, labels, title="Line Chart", xlabel="X-Axis", ylabel="Y-Axis"):
     """
     Generate a line chart visualization.
@@ -21,5 +23,5 @@ def line_visualize(data, labels, title="Line Chart", xlabel="X-Axis", ylabel="Y-
     plt.ylabel(ylabel)
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.tight_layout()
-    plt.savefig("line_chart.png")
+    plt.savefig("../../line_chart.png")
     plt.close()

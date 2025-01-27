@@ -1,5 +1,7 @@
+from crewai.tools import tool
 import matplotlib.pyplot as plt
 
+@tool('bar_visualize')
 def bar_visualize(data, labels, title="Bar Chart", xlabel="Categories", ylabel="Values"):
     """
     Generate a bar chart visualization.
@@ -21,5 +23,5 @@ def bar_visualize(data, labels, title="Bar Chart", xlabel="Categories", ylabel="
     plt.ylabel(ylabel)
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
-    plt.savefig("bar_chart.png")
+    plt.savefig("../../bar_chart.png")
     plt.close()

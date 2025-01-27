@@ -1,11 +1,15 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-# from tools import markdown_to_df, image_processor, bar_visualize, line_visualize
+from tools.register import tool_functions  # tool_functions import
 
 @CrewBase
 class AnalysisCrew:
-    agents_config = 'config/agents.yaml' 
-    tasks_config = 'config/tasks.yaml' 
+    agents_config = 'config/agents.yaml'
+    tasks_config = 'config/tasks.yaml'
+
+    def __init__(self):
+        # tool_functions를 클래스 내 변수로 저장
+        self.tool_functions = tool_functions
 
     @agent
     def retrieval_scheduler(self) -> Agent:
@@ -14,16 +18,17 @@ class AnalysisCrew:
             verbose=True,
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def table_changer(self) -> Agent:
         return Agent(
             config=self.agents_config['table_changer'],
             verbose=True,
-            # tools=[markdown_to_df],
+            # tool_functions에서 markdown_to_df를 가져와 적용
+            tools=[self.tool_functions["markdown_to_df"]],
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def table_analyzer(self) -> Agent:
         return Agent(
@@ -31,16 +36,17 @@ class AnalysisCrew:
             verbose=True,
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def graph_analyzer(self) -> Agent:
         return Agent(
             config=self.agents_config['graph_analyzer'],
             verbose=True,
-            # tools=[image_processor],
+            # tool_functions에서 image_processor를 가져와 적용
+            tools=[self.tool_functions["image_processor"]],
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def context_analyzer(self) -> Agent:
         return Agent(
@@ -48,24 +54,30 @@ class AnalysisCrew:
             verbose=True,
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def visualizer(self) -> Agent:
         return Agent(
             config=self.agents_config['visualizer'],
             verbose=True,
-            # tools=[bar_visualize, line_visualize],
+            allow_code_excution=True,
+            # tool_functions에서 bar_visualize와 line_visualize를 가져와 적용
+            tools=[
+                self.tool_functions["bar_visualize"],
+                self.tool_functions["line_visualize"]
+            ],
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def code_executor(self) -> Agent:
         return Agent(
             config=self.agents_config['code_executor'],
             verbose=True,
+            allow_code_excution=True,
             llm='gpt-4o-mini'
         )
-    
+
     @agent
     def final_answer_agent(self) -> Agent:
         return Agent(
@@ -73,55 +85,55 @@ class AnalysisCrew:
             verbose=True,
             llm='gpt-4o-mini'
         )
-    
+
     @task
     def retrieval_task(self) -> Task:
         return Task(
             config=self.tasks_config['retrieval_task']
         )
-    
+
     @task
     def table_conversion_task(self) -> Task:
         return Task(
             config=self.tasks_config['table_conversion_task']
         )
-    
+
     @task
     def table_analysis_task(self) -> Task:
         return Task(
             config=self.tasks_config['table_analysis_task']
         )
-    
+
     @task
     def graph_analysis_task(self) -> Task:
         return Task(
             config=self.tasks_config['graph_analysis_task']
         )
-    
+
     @task
     def context_analysis_task(self) -> Task:
         return Task(
             config=self.tasks_config['context_analysis_task']
         )
-    
+
     @task
     def visualization_task(self) -> Task:
         return Task(
             config=self.tasks_config['visualization_task']
         )
-    
+
     @task
     def code_execution_task(self) -> Task:
         return Task(
             config=self.tasks_config['code_execution_task']
         )
-    
+
     @task
     def answer_task(self) -> Task:
         return Task(
             config=self.tasks_config['answer_task']
         )
-    
+
     @crew
     def analysis_crew(self) -> Crew:
         return Crew(

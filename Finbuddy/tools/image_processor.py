@@ -1,6 +1,8 @@
+from crewai.tools import tool
 import pytesseract
 from PIL import Image
 
+@tool('image_processor')
 def image_processor(image_path: str) -> str:
     """
     Extract text or data from a graph image.
