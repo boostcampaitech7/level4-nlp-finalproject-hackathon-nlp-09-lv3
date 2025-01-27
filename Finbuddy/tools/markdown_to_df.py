@@ -1,61 +1,49 @@
+from crewai.tools import BaseTool
+from pydantic import BaseModel, Field
 import pandas as pd
-from crewai.tools import tool
 from io import StringIO
+from typing import Type
 
-@tool('markdown_to_df')
-def markdown_to_df(markdown: str) -> pd.DataFrame:
-    """Markdown 테이블을 DataFrame으로 변환하는 도구."""
-    # Markdown을 문자열로 받은 후, StringIO로 처리하여 pandas의 read_csv로 DataFrame으로 변환
-    markdown = markdown.replace('|', ',')  # '|'를 ','로 바꿔서 csv 형식으로 만듬
-    markdown_io = StringIO(markdown)
-    df = pd.read_csv(markdown_io, sep=",", engine="python")
-    return df
+class MarkdownToDfInput(BaseModel):
+    """Input schema for MarkdownToDfTool."""
+    markdown: str = Field(..., description="Markdown formatted string to be converted into a DataFrame.")
 
+class MarkdownToDfTool(BaseTool):
+    name: str = "markdown_to_df"
+    description: str = "Converts a Markdown table to a Pandas DataFrame."
+    args_schema: Type[BaseModel] = MarkdownToDfInput
 
-# from crewai.tools import tool
-# import pandas as pd
-# import markdown
-# from io import StringIO
+    def _run(self, markdown: str) -> pd.DataFrame:
+        """
+        Converts a Markdown table into a Pandas DataFrame.
 
-# @tool('markdown_to_df')
-# def markdown_to_df(markdown_text: str) -> pd.DataFrame:
-#     """
-#     Convert a markdown table to a pandas DataFrame.
-    
-#     Args:
-#         markdown_text (str): A string containing the markdown table.
-    
-#     Returns:
-#         pd.DataFrame: A pandas DataFrame representation of the table.
-#     """
-#     # Convert markdown to HTML
-#     html = markdown.markdown(markdown_text, extensions=['tables'])
-    
-#     # Extract the table using pandas
-#     dfs = pd.read_html(StringIO(html))
-#     if dfs:
-#         return dfs[0]
-#     else:
-#         raise ValueError("No table found in the markdown text.")
+        Args:
+            markdown (str): Markdown table as a string.
 
-# from crewai.tools import tool
-# import pandas as pd
-# from io import StringIO
+        Returns:
+            pd.DataFrame: DataFrame representation of the Markdown table.
+        """
+        try:
+            # Replace pandas.compat.StringIO with io.StringIO
+            df = pd.read_csv(StringIO(markdown), sep="|", engine="python", skipinitialspace=True)
+            # Drop empty columns/rows created due to Markdown formatting
+            df = df.dropna(how="all", axis=1).dropna(how="all", axis=0)
+            df.columns = [col.strip() for col in df.columns]  # Strip whitespace from column names
+            df = df.iloc[1:].reset_index(drop=True)  # Skip the alignment row (e.g., `---|---`)
+            return df
+        except Exception as e:
+            raise ValueError(f"Failed to convert Markdown to DataFrame: {str(e)}")
 
-# @tool('markdown_to_df')
-# def markdown_to_df(markdown_data: str):
-#     """Convert markdown formatted table data into a pandas DataFrame."""
-    
-#     # 마크다운을 CSV로 처리하여 pandas DataFrame 생성
-#     df = pd.read_csv(StringIO(markdown_data), delimiter="|", skipinitialspace=True)
+# Example usage
+if __name__ == "__main__":
+    markdown_table = """
+    | Name      | Age | City       |
+    |-----------|-----|------------|
+    | John Doe  | 28  | New York   |
+    | Jane Smith| 34  | Los Angeles|
+    | Alice     | 29  | Chicago    |
+    """
 
-#     # 불필요한 첫 번째 열과 마지막 열을 제거
-#     df = df.drop(df.columns[[0, -1]], axis=1)
-
-#     # 컬럼 이름을 정리
-#     df.columns = [col.strip() for col in df.columns]
-
-#     # 결과 DataFrame 반환
-#     return df
-
-
+    tool = MarkdownToDfTool()
+    result = tool._run(markdown=markdown_table)
+    print(result)

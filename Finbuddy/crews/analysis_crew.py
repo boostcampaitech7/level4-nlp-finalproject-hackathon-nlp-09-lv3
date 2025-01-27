@@ -1,15 +1,13 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from tools.register import tool_functions  # tool_functions import
+from tools.markdown_to_df import MarkdownToDfTool  # markdown_to_df 도구 임포트
+from tools.bar_visualize import BarGraphTool  # bar_visualize 도구 임포트
+from tools.line_visualize import LineGraphTool  # line_visualize 도구 임포트
 
 @CrewBase
 class AnalysisCrew:
-    agents_config = 'config/agents.yaml'
-    tasks_config = 'config/tasks.yaml'
-
-    def __init__(self):
-        # tool_functions를 클래스 내 변수로 저장
-        self.tool_functions = tool_functions
+    agents_config = 'config/agents.yaml' 
+    tasks_config = 'config/tasks.yaml' 
 
     @agent
     def retrieval_scheduler(self) -> Agent:
@@ -25,7 +23,7 @@ class AnalysisCrew:
             config=self.agents_config['table_changer'],
             verbose=True,
             # tool_functions에서 markdown_to_df를 가져와 적용
-            tools=[self.tool_functions["markdown_to_df"]],
+            tools=[MarkdownToDfTool()],
             llm='gpt-4o-mini'
         )
 
@@ -42,8 +40,6 @@ class AnalysisCrew:
         return Agent(
             config=self.agents_config['graph_analyzer'],
             verbose=True,
-            # tool_functions에서 image_processor를 가져와 적용
-            tools=[self.tool_functions["image_processor"]],
             llm='gpt-4o-mini'
         )
 
@@ -60,12 +56,8 @@ class AnalysisCrew:
         return Agent(
             config=self.agents_config['visualizer'],
             verbose=True,
-            allow_code_excution=True,
             # tool_functions에서 bar_visualize와 line_visualize를 가져와 적용
-            tools=[
-                self.tool_functions["bar_visualize"],
-                self.tool_functions["line_visualize"]
-            ],
+            tools=[BarGraphTool(), LineGraphTool()],
             llm='gpt-4o-mini'
         )
 
@@ -74,7 +66,6 @@ class AnalysisCrew:
         return Agent(
             config=self.agents_config['code_executor'],
             verbose=True,
-            allow_code_excution=True,
             llm='gpt-4o-mini'
         )
 
