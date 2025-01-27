@@ -1,9 +1,9 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from tools import markdown_to_df, bar_visualize, line_visualize, image_processor
+# from tools import markdown_to_df, image_processor, bar_visualize, line_visualize
 
 @CrewBase
-class RetrievalAnalysisCrew:
+class AnalysisCrew:
     agents_config = 'config/agents.yaml' 
     tasks_config = 'config/tasks.yaml' 
 
@@ -12,93 +12,107 @@ class RetrievalAnalysisCrew:
         return Agent(
             config=self.agents_config['retrieval_scheduler'],
             verbose=True,
-            llm='gpt-4o-mini',
+            llm='gpt-4o-mini'
         )
-
+    
+    @agent
+    def table_changer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['table_changer'],
+            verbose=True,
+            # tools=[markdown_to_df],
+            llm='gpt-4o-mini'
+        )
+    
     @agent
     def table_analyzer(self) -> Agent:
         return Agent(
             config=self.agents_config['table_analyzer'],
             verbose=True,
-            tools=[markdown_to_df, bar_visualize, line_visualize],
-            llm='gpt-4o-mini',  # 멀티모달로 바꿔야할듯
+            llm='gpt-4o-mini'
         )
-
+    
     @agent
     def graph_analyzer(self) -> Agent:
         return Agent(
             config=self.agents_config['graph_analyzer'],
             verbose=True,
-            tools=[image_processor],
-            llm='gpt-4o-mini',  # 멀티모달로 바꿔야할듯
+            # tools=[image_processor],
+            llm='gpt-4o-mini'
         )
-
+    
     @agent
     def context_analyzer(self) -> Agent:
         return Agent(
             config=self.agents_config['context_analyzer'],
             verbose=True,
-            llm='gpt-4o-mini',
+            llm='gpt-4o-mini'
         )
-
+    
     @agent
     def visualizer(self) -> Agent:
         return Agent(
             config=self.agents_config['visualizer'],
             verbose=True,
-            tools=[bar_visualize, line_visualize],
-            llm='gpt-4o-mini',  # 멀티모달로 바꿔야할듯
+            # tools=[bar_visualize, line_visualize],
+            llm='gpt-4o-mini'
         )
-
+    
     @agent
     def final_answer_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['final_answer_agent'],
             verbose=True,
-            llm='gpt-4o-mini',  # 멀티모달로 바꿔야할듯
+            llm='gpt-4o-mini'
         )
-
+    
     @task
-    def process_retrieval_results(self) -> Task:
+    def retrieval_task(self) -> Task:
         return Task(
-            config=self.tasks_config['process_retrieval_results']
+            config=self.tasks_config['retrieval_task']
         )
-
+    
     @task
-    def analyze_table(self) -> Task:
+    def table_conversion_task(self) -> Task:
         return Task(
-            config=self.tasks_config['analyze_table']
+            config=self.tasks_config['table_conversion_task']
         )
-
+    
     @task
-    def analyze_graph(self) -> Task:
+    def table_analysis_task(self) -> Task:
         return Task(
-            config=self.tasks_config['analyze_graph']
+            config=self.tasks_config['table_analysis_task']
         )
-
+    
     @task
-    def analyze_context(self) -> Task:
+    def graph_analysis_task(self) -> Task:
         return Task(
-            config=self.tasks_config['analyze_context']
+            config=self.tasks_config['graph_analysis_task']
         )
-
+    
     @task
-    def visualize_table(self) -> Task:
+    def context_analysis_task(self) -> Task:
         return Task(
-            config=self.tasks_config['visualize_table']
+            config=self.tasks_config['context_analysis_task']
         )
-
+    
     @task
-    def generate_final_answer(self) -> Task:
+    def visualization_task(self) -> Task:
         return Task(
-            config=self.tasks_config['generate_final_answer']
+            config=self.tasks_config['visualization_task']
         )
-
+    
+    @task
+    def answer_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['answer_task']
+        )
+    
     @crew
-    def retrieval_analysis_crew(self) -> Crew:
+    def analysis_crew(self) -> Crew:
         return Crew(
-            agents=self.agents,  # @agent 데코레이터로 정의된 에이전트를 자동으로 가져옴
-            tasks=self.tasks,    # @task 데코레이터로 정의된 태스크를 자동으로 가져옴
+            agents=self.agents,  # @agent 데코레이터로 감싸진 에이전트를 자동으로 가져옴
+            tasks=self.tasks,    # @task 데코레이터로 감싸진 태스크를 자동으로 가져옴
             process=Process.sequential,
             verbose=True,
         )
