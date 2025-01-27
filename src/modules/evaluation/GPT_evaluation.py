@@ -95,7 +95,7 @@ def G_generation_evaluate(query:str, ground_truth_answer:str, generated_answer:s
 
                 ### Output:
 
-                #### 2. Generation Evaluation (30 points):
+                #### 1. Generation Evaluation (30 points):
                 Evaluate the quality of the generated answer based on the following criteria:
 
                 1. **Is the final answer clearly relevant to the question and reflective of the user’s intent?** (5 points)  

@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-routes = glob('datas/*/*.csv')
+routes = glob('/data/ephemeral/home/clone/src/modules/datas/*/*.csv')
 load_dotenv()
 
 df = pd.DataFrame()
@@ -17,6 +17,7 @@ print(df.head(1))
 
 paragraphs = df[df['type'] == 'paragraph']
 paragraphs = paragraphs.reset_index(drop = True)
+
 def html_to_content(html):
     if not isinstance(html, str):  # 입력이 문자열이 아닌 경우
         return ""
@@ -135,5 +136,5 @@ for idx in tqdm(range(len(source))):
     print("\n작성기관:", results[-1]['investment'])
 
 result_df = pd.DataFrame(results)
-result_df.to_csv('qa_validation_dataset_2.csv', index=False, encoding='utf-8-sig')
+result_df.to_csv('/data/ephemeral/home/clone/src/modules/datas/validation_dataset.csv', index=False, encoding='utf-8-sig')
 print("Dataset has been saved to 'qa_validation_dataset_2.csv'")

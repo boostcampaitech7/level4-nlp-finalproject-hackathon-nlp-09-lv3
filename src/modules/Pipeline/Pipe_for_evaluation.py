@@ -11,7 +11,7 @@ from evaluation import G_generation_evaluate, G_retrieval_evaluate
 class Pipeline_For_Eval:
     def __init__(self, 
                  collection_name = 'chrdb.db',
-                 persist_directory = 'DB',
+                 persist_directory = 'modules/DB',
                  mode = 'NaverCloudEmb',
                  topk = 5,
                  verbose = False):
@@ -25,14 +25,14 @@ class Pipeline_For_Eval:
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
             print('생성된 DB가 있어 로드합니다.')
             DB = ChromaDB(collection_name, persist_directory, mode = mode)
-            BASE_DIR = './datas' # 데이터가 저장돼 있는 루트를 의미합니다.
+            BASE_DIR = './modules/datas' # 데이터가 저장돼 있는 루트를 의미합니다.
             df = get_only_paragraphs(BASE_DIR)
             documents = create_documents(df)
             DB.load_collection()
             self.db = DB.verify_db()
         else:
             print('생성된 DB가 없어 만듭니다.') 
-            BASE_DIR = './datas' # 데이터가 저장돼 있는 루트를 의미합니다.
+            BASE_DIR = './modules/datas' # 데이터가 저장돼 있는 루트를 의미합니다.
             df = get_only_paragraphs(BASE_DIR)
             documents = create_documents(df)
             DB = ChromaDB(collection_name, persist_directory, mode = mode)
@@ -93,9 +93,12 @@ class Pipeline_For_Eval:
         documents = "\n".join(
         [f"참고 문서{idx + 1}: {doc.strip()}" for idx, doc in enumerate(retrieval_results)])
         prompt = f"""
-주어지는 참고 문서들을 반드시 활용하여 질문에 100자 이내의 정답을 말하세요.
+다음 참고 문서를 반드시 활용하여 질문에 대한 정확하고 간결한 답변을 작성하세요. 
+답변은 반드시 질문과 관련된 사실에 기반하며, 불필요한 반복이나 모호함 없이 핵심 내용을 포함해야 합니다. 
+200자를 초과하지 않도록 작성하세요.
+
 질문: {query.strip()}
-{documents}
+{documents}"
 정답:"""
         if self.verbose:
             print(prompt)
@@ -112,7 +115,7 @@ class Pipeline_For_Eval:
 
     def QA_eval(self, mode = 'ensemble', sampling = True):
 
-        eval_dataset = pd.read_csv('datas/validation_dataset.csv')
+        eval_dataset = pd.read_csv('modules/datas/validation_dataset.csv')
         if sampling:
             sample = eval_dataset.sample(1)
             query = sample['question'].values[0]
@@ -156,5 +159,5 @@ class Pipeline_For_Eval:
             eval_dataset['generation_score'] = generation_scores
 
             print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
-            eval_dataset.to_csv(f'datas/g_eval_result_{self.model_name}.csv')
+            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt2.csv')
             return eval_dataset
