@@ -59,6 +59,14 @@ class AnalysisCrew:
         )
     
     @agent
+    def code_executor(self) -> Agent:
+        return Agent(
+            config=self.agents_config['code_executor'],
+            verbose=True,
+            llm='gpt-4o-mini'
+        )
+    
+    @agent
     def final_answer_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['final_answer_agent'],
@@ -100,6 +108,12 @@ class AnalysisCrew:
     def visualization_task(self) -> Task:
         return Task(
             config=self.tasks_config['visualization_task']
+        )
+    
+    @task
+    def code_execution_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['code_execution_task']
         )
     
     @task
