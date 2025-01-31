@@ -8,3 +8,6 @@ data_level0.bin
 header.bin
 length.bin
 link_lists.bin
+markdowns
+tables
+tableimage

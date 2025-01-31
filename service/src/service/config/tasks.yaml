@@ -17,21 +17,19 @@
 #   agent: reporting_analyst
 
 
-convert_task:
-  description: >
-    제공된 마크다운 테이블을 pandas DataFrame으로 변환
-  expected_output: >
-    - 변환된 pandas DataFrame을 'dataframe.csv' 파일로 저장
-    - 데이터 전처리 요약 (결측값 처리, 표준화, 타입 변환 등 수행 내역)
-  agent: table_conversion_agent
 
-
-visualize_task:
+convert_markdown_task:
   description: >
-    분석된 데이터를 기반으로 적합한 시각화 자료를 생성하는 작업입니다. 
-    사용자들이 데이터를 쉽게 이해할 수 있도록 막대그래프, 꺾은선그래프, 파이차트 등 적절한 시각화 방법을 적용합니다.
+    제공된 마크다운 테이블을 pandas DataFrame으로 변환 후 CSV로 저장
   expected_output: >
-    - 생성된 그래프 (예: 막대그래프, 꺾은선그래프, 파이차트 등)
-    - 그래프 파일 경로 (PNG, JPEG 또는 SVG 포맷)
-    - 시각화 자료에 대한 간단한 설명 (그래프의 의미 및 주요 통찰 요약)
-  agent: table_visualization_agent
+    - 변환된 CSV 파일
+    - (필요 시) 데이터 전처리 요약 정보
+  agent: markdown_to_csv_agent
+
+visualize_csv_task:
+  description: >
+    CSV 데이터를 기반으로 적합한 그래프/차트를 생성하여 시각화하는 작업
+  expected_output: >
+    - 생성된 그래프 (예: 막대그래프, 라인그래프, 파이차트 등)
+    - 그래프 파일 경로(report.png 등)
+  agent: csv_visualization_agent

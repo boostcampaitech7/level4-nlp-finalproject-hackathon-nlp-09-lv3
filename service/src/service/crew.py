@@ -1,95 +1,111 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task, before_kickoff
-from .tools.markdown_to_dataframe import markdown_to_dataframe
+from .tools.markdown_to_csv import process_markdown_folder
 from .tools.graph_visualizer import create_visualization
-
-# If you want to run a snippet of code before or after the crew starts, 
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+import os
 
 @CrewBase
 class Service():
-	"""Service crew"""
-	agents_config = 'config/agents.yaml'
-	tasks_config = 'config/tasks.yaml'
+    """Service crew"""
 
-	def __init__(self, table=None):
-		super().__init__()
-		self.table = table  # 입력 테이블 저장
+    def __init__(self, md_folder: str = None, csv_file: str = None):
+        super().__init__()
+        base_path = os.path.dirname(os.path.abspath(__file__))
 
-	@before_kickoff
-	def prepare_inputs(self, inputs=None):
-		"""기본 테이블 데이터 초기화"""
-		if not inputs:
-			inputs = {}
-		
-		# self.table이 있으면 그것을 사용, 없으면 기본값 사용
-		inputs['table'] = self.table if self.table is not None else """
-| 항목               | 2022       | 2023       | 2024F      | 2025F      |
-|--------------------|------------|------------|------------|------------|
-| 매출액 (십억원)    | 50,983.3   | 55,249.8   | 60,440.3   | 37,471.5   |
-| 영업이익 (십억원)  | 2,979.4    | 2,529.2    | 1,056.5    | 2,837.0    |
-| 세전이익 (십억원)  | 2,778.3    | 2,298.6    | 692.2      | 2,452.5    |
-| 순이익 (십억원)    | 1,845.4    | 1,373.7    | 764.2      | 1,118.4    |
-| EPS                | 29,574     | 19,709     | 4,441      | 5,293      |
-| PER                | 1.49       | 1.21       | 0.81       | 0.79       |
-| PBR                | 9.08       | 10.26      | 7.93       | 6.09       |
-| EV/EBITDA          | 6.94       | 4.20       | 2.36       | 3.38       |
-| ROE                | 401,768    | 111,247    | 417,505    | 428,287    |
-| BPS                | 10,000     | 3,500      | 3,500      | 3,500      |
-| DPS                |            |            |            |            |"""
-		return inputs
+        # YAML 설정 파일 경로
+        self.agents_config = os.path.join(base_path, 'config', 'agents.yaml')
+        self.tasks_config = os.path.join(base_path, 'config', 'tasks.yaml')
 
-	@agent
-	def table_conversion_agent(self) -> Agent:
-		return Agent(
-			config=self.agents_config['table_conversion_agent'],
-			tools=[markdown_to_dataframe],
-			verbose=True
-		)
+        # 입력 폴더 및 출력 파일 경로 기본값 설정
+        # self.md_folder = md_folder or os.path.join(base_path, 'markdowns')
+        self.md_folder = "/data/level4-nlp-finalproject-hackathon-nlp-09-lv3/service/markdowns"
 
-	@agent
-	def table_visualization_agent(self) -> Agent:
-		return Agent(
-			config=self.agents_config['table_visualization_agent'],
-			tools=[create_visualization],
-			verbose=True
-		)
 
-	# To learn more about structured task outputs, 
-	# task dependencies, and task callbacks, check out the documentation:
-	# https://docs.crewai.com/concepts/tasks#overview-of-a-task
-	@task
-	def convert_table(self) -> Task:
-		return Task(
-			config=self.tasks_config['convert_task'],
-			context=[{
-				"description": "마크다운 테이블을 DataFrame으로 변환",
-				"expected_output": "pandas DataFrame",
-				"input": self.table if self.table is not None else inputs.get('table')
-			}],
-			output_file='dataframe.csv'
-		)
+    @before_kickoff
+    def prepare_inputs(self, inputs=None):
+        """
+        크루 시작 전에 md_folder, csv_file 등을 context에 넣어둔다.
+        """
+        if not inputs:
+            inputs = {}
 
-	@task
-	def visualize_table(self) -> Task:
-		return Task(
-			config=self.tasks_config['visualize_task'],
-			context=[{
-				"description": "DataFrame을 시각화",
-				"expected_output": "시각화된 그래프",
-				"input": "dataframe.csv"
-			}],
-			output_file='report.png'
-		)
+        # 혹시 생성자에서 None 이었으면 디폴트값 지정
+        if not self.md_folder:
+            self.md_folder = os.path.join(os.getcwd(), "markdowns")
 
-	@crew
-	def crew(self) -> Crew:
-		"""Creates the Service crew"""
+        # crewai context에 저장하면, "{md_folder}" 식으로 태스크에서 치환 가능
+        inputs["md_folder"] = self.md_folder
+        return inputs
 
-		return Crew(
-			agents=self.agents, # Automatically created by the @agent decorator
-			tasks=self.tasks, # Automatically created by the @task decorator
-			process=Process.sequential,
-			verbose=True,
-		)
+    @agent
+    def markdown_to_csv_agent(self) -> Agent:
+        """
+        마크다운(.md) -> CSV 변환 에이전트 (config=로 YAML에서 설정을 로딩)
+        """
+        return Agent(
+            config=self.agents_config["markdown_to_csv_agent"],  # agents.yaml의 키
+            tools=[process_markdown_folder],
+            verbose=True
+        )
+
+    @agent
+    def csv_visualization_agent(self) -> Agent:
+        """
+        CSV -> 시각화 에이전트
+        """
+        return Agent(
+            config=self.agents_config["csv_visualization_agent"],  # agents.yaml의 키
+            tools=[create_visualization],
+            llm=None,
+            verbose=True
+        )
+
+    @task
+    def convert_markdown_task(self) -> Task:
+        """
+        (1) 마크다운 폴더 -> CSV 변환
+        - config=self.tasks_config[...]로 tasks.yaml에서 설정을 가져온다.
+        - 추가로 context, output_file 등을 코드에서 override 가능
+        """
+        return Task(
+            config=self.tasks_config["convert_markdown_task"],  # tasks.yaml의 키
+            tool_arguments={"base_folder": "{md_folder}"},
+            context=[{
+                "description": "마크다운 폴더에서 표 및 텍스트를 추출하여 CSV로 변환",
+                "expected_output": "csv file",
+                "input": "{md_folder}"
+            }],
+            output_file="markdown_process_result.json"
+        )
+
+    @task
+    def visualize_csv_task(self) -> Task:
+        """
+        (2) 변환된 CSV를 이용해 그래프 생성
+        """
+        return Task(
+            config=self.tasks_config["visualize_csv_task"],     # tasks.yaml의 키
+            tool_arguments={
+            "csv_path": "/data/level4-nlp-finalproject-hackathon-nlp-09-lv3/service/tables"
+            },
+            context=[{
+                "description": "tables 폴더 내 CSV들을 표 이미지로 변환",
+                "expected_output": "tables_image 폴더에 여러 PNG 생성",
+            }],
+        )
+
+    @crew
+    def crew(self):
+        """
+        전체 작업을 순차적으로 실행하는 Crew
+        """
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            # tasks=[
+            #     self.convert_markdown_task(),
+            #     self.visualize_csv_task()
+            # ],
+            process=Process.sequential,
+            verbose=True
+        )
