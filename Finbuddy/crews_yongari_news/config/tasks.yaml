@@ -1,0 +1,41 @@
+
+
+news_search_task:
+  description: >
+    사용자의 질문에 답하기 위해 적절한 검색어(20자 이내)를 작성하여 뉴스의 url들을 내보냅니다.
+    제공되는 url은 반드시 리스트의 형태여야 합니다.
+    도구를 사용하여 검색합니다.
+    질문: {query}
+  expected_output: >
+    사용자의 질문에 도움이 되는 뉴스 기사들의 URL 리스트
+  agent: searcher
+
+news_analyze_task:
+  description: >
+
+    뉴스의 URL들을 받아 사용자의 질문에 도움이 될 수 있는 부분들을 추출합니다.
+    도구를 사용하여 URL에 방문하여 뉴스의 제목과 본문을 가져옵니다.
+    제공된 정보는 최종 답변가에게 전달됩니다.
+    질문: {query}
+    [출력 형식]
+    1. 뉴스 제목1(출처 url1) : 본문 내용1
+    2. 뉴스 제목2(출처 url2) : 본문 내용2
+    3. ...
+  expected_output: >
+    사용자의 질문에 도움이 될 수 있는 뉴스의 제목, 출처, 본문 내용들
+  agent: analyzer
+  context:
+    - news_search_task
+
+answer_task:
+  description: >
+    analyzer에게 제공받은 정보를 바탕으로 사용자의 질문에 대해 가장 도움이 되는 답변을 제공합니다.
+    신뢰성을 위해 답변을 전부 제공한 후, 반드시 뉴스의 제목과 url을 같이 첨부합니다.
+    마지막에는 질문에 대한 종합적인 답변을 제시합니다.
+    질문: {query}
+  expected_output: >
+    제공된 정보를 바탕으로 만들어진 신뢰성 있는 대답과 그 대답들의 출처
+  agent: answerman
+  context:
+    - news_search_task
+    - news_analyze_task
