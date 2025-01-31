@@ -1,16 +1,14 @@
 # FinBuddy
 ## 증권사 자료 기반 주식 LLM 서비스 개발
 증권사 보고서를 활용하여 LLM 응용 시 매우 중요한 RAG(Retrieval Augmented Generation) 기술을 탐구하여 최상의 답변을 하는 LLM 서비스를 구현
-
 <br><br>
-
 ## 1. Overview
 
 ## 2. 프로젝트 구성
+
 ### ⏰ 개발 기간
 - 2025년 1월 10일 ~ 2025년 2월 13일
 - 부스트캠프 AI Tech NLP 트랙 20-24주차 
-
 <br>
 
 ### ✨ 분석 환경
@@ -18,7 +16,6 @@
 - OS : Linux
 - Language : Python
 - Libraries(mainly used) : Pytorch, Hugging Face, Wandb etc.
-
 <br>
 
 ## 3. 프로젝트 결과
@@ -65,11 +62,8 @@
         </tr>
     </tbody>
 </table>
-
 <br><br>
 
 ---
-
-<br>
 
 ## Reference

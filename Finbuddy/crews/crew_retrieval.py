@@ -7,6 +7,8 @@ class RetrievalCrew:
     agents_config = 'config/agents.yaml' 
     tasks_config = 'config/tasks.yaml' 
 
+    print(agents_config)
+
     @before_kickoff
     def prepare_inputs(self, inputs):
         inputs['table or image'] = "Some extra information" # 테이블, 그래프같은거
@@ -15,35 +17,30 @@ class RetrievalCrew:
     @agent
     def retrievalAgent(self) -> Agent:
         return Agent(
-            config = self.agents_config['visualization_agent'],
+            config = self.agents_config['retrieval_scheduler'],
             verbose = True,
-            # tools = visualizationTool tool 만들어야함
         )
 
     @agent
     def contextAgent(self) -> Agent:
         return Agent(
-            config = self.agents_config['visualization_agent'],
+            config = self.agents_config['context_analyzer'],
             verbose = True,
-            # tools = visualizationTool tool 만들어야함
         )
 
     
     @task
-    def visualize(self) -> Task:
+    def finalAnswerAgent(self) -> Task:
         return Task(
-            config = self.tasks_config['visualization_task']
+            config = self.tasks_config['final_answer_agent']
         )
     
     @crew
     def visualization_crew(self) -> Crew:
         return Crew(
-            agents = [
-                self.visualator
-            ],
-            tasks = [
-                self.visualize
-            ],
-            process = Process.sequential
+            agents=self.agents,  
+            tasks=self.tasks,    
+            process=Process.sequential,
+            verbose=True,
         )
     

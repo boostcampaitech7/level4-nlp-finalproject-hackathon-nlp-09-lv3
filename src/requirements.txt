@@ -1,7 +1,6 @@
-numpy==1.24.4
 python-dotenv==1.0.1
 langchain==0.3.14
-chromadb==0.6.3
+chromadb==0.5.23
 langchain-community==0.3.14
 pandas==2.2.3
 kiwipiepy==0.20.3
