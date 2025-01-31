@@ -88,7 +88,7 @@ export default function ChatBot() {
       {/* 채팅 초기화 버튼 */}
       <div className="clear-chat-container">
         <button onClick={showModal} className="clear-chat-button">
-          <TrashIcon className="h-5 w-5 mr-2" /> {/* 빗자루 아이콘 */}
+          <TrashIcon className="h-5 w-5 mr-2" /> {/* 쓰레기통통 아이콘 */}
           Clear Chat
         </button>
       </div>

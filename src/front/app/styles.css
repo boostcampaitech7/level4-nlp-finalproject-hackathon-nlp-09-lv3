@@ -42,12 +42,12 @@ body {
   }
   
   .modal-button.confirm {
-    background-color: #00be19; /* 빨간색 배경 */
+    background-color: #009414;
     color: white;
   }
   
   .modal-button.cancel {
-    background-color: #585858; /* 파란색 배경 */
+    background-color: #585858;
     color: white;
   }
   
@@ -97,7 +97,7 @@ body {
   
     /* 높이를 유동적으로 설정 */
     height: auto;
-    max-height: 80vh; /* 최대 높이를 화면의 80%로 제한 */
+    max-height: 85vh; /* 최대 높이를 화면의 80%로 제한 */
     overflow-y: auto; /* 내용이 넘칠 경우 스크롤 가능 */
   }
   
@@ -154,9 +154,12 @@ body {
   
   .input-field {
     flex: 1;
-    border: 1px solid #d1d5db;
+    border: 1px solid #555; /* 테두리 색상 조정 */
     border-radius: 8px;
     padding: 8px;
+    background-color: #222; /* 입력 창을 어두운 회색으로 변경 */
+    color: white;
+    outline: none;
   }
   
   .send-button {
