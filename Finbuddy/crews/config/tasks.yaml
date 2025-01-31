@@ -1,38 +1,41 @@
-# visualization_task:
-#   description: >
-#     데이터가 주어지면 사용자가 알아보기 쉽게 시각화하는 도구입니다.
-#   expected_output: >
-#     주어진 데이터에 대한 시각화된 그래프
-#   agent: visualization_agent
 
-# news_collectiong_task:
-#   description: >
-#     주어진 토픽에 대한 가장 관련성 있는 뉴스를 검색합니다.
-#   expected_output: >
-#     주어진 토픽에 대한 관련성 높은 뉴스 5개
-#   agent: news_collector_agent
 
-# summarization_task:
-#   description: >
-#     주어진 뉴스 정보들을 요약합니다.
-#   expected_output: >
-#     주어진 뉴스의 중요한 정보만을 담은 200자 이내의 요약
-#   agent: summary_agent
-
-search_task:
-  description: > 
-    최신 AI 및 데이터사이언스의 연구 동향을 찾고 내용을 가져오세요.
-    Key trends와 획기적인 기술, 산업의 잠재성을 함께 기술하세요.
-    당신의 대답은 반드시 full analysis report여야 합니다.
-  expected_output: >
-    AI와 데이터사이언스의 최신 연구 동향에 대한 상세한 분석 리포트
-  agent: researcher
-
-write_task:
+news_search_task:
   description: >
-    제공된 정보들을 바탕으로 최신 AI 트렌드를 강조하는 블로그 포스트를 작성하세요.
-    당신의 포스트는 유용한 정보를 담고 있어야 하며, AI에 대해 잘 모르는 일반인도 이해할 수 있어야 합니다.
-    최종 답변은 반드시 2개 이상의 paragraph를 담고 있는 완전한 블로그 포스트여야 합니다.
+    사용자의 질문에 답하기 위해 적절한 검색어(20자 이내)를 작성하여 뉴스의 url들을 내보냅니다.
+    제공되는 url은 반드시 리스트의 형태여야 합니다.
+    도구를 사용하여 검색합니다.
+    질문: {query}
   expected_output: >
-    일반인도 이해하기 쉬운 AI 트렌드 블로그 포스트
-  agent: writer
+    사용자의 질문에 도움이 되는 뉴스 기사들의 URL 리스트
+  agent: searcher
+
+news_analyze_task:
+  description: >
+
+    뉴스의 URL들을 받아 사용자의 질문에 도움이 될 수 있는 부분들을 추출합니다.
+    도구를 사용하여 URL에 방문하여 뉴스의 제목과 본문을 가져옵니다.
+    제공된 정보는 최종 답변가에게 전달됩니다.
+    질문: {query}
+    [출력 형식]
+    1. 뉴스 제목1(출처 url1) : 본문 내용1
+    2. 뉴스 제목2(출처 url2) : 본문 내용2
+    3. ...
+  expected_output: >
+    사용자의 질문에 도움이 될 수 있는 뉴스의 제목, 출처, 본문 내용들
+  agent: analyzer
+  context:
+    - news_search_task
+
+answer_task:
+  description: >
+    analyzer에게 제공받은 정보를 바탕으로 사용자의 질문에 대해 가장 도움이 되는 답변을 제공합니다.
+    신뢰성을 위해 답변을 전부 제공한 후, 반드시 뉴스의 제목과 url을 같이 첨부합니다.
+    마지막에는 질문에 대한 종합적인 답변을 제시합니다.
+    질문: {query}
+  expected_output: >
+    제공된 정보를 바탕으로 만들어진 신뢰성 있는 대답과 그 대답들의 출처
+  agent: answerman
+  context:
+    - news_search_task
+    - news_analyze_task
