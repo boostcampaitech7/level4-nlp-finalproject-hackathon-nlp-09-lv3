@@ -1,13 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid'; // Heroicons에서 아이콘 import
+import { TrashIcon, MagnifyingGlassIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid'; // Heroicons에서 아이콘 import
 import './styles.css'; // CSS 파일 import
 
 export default function ChatBot() {
   const [messages, setMessages] = useState<{ user: string; bot: string }[]>([]);
   const [input, setInput] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false); // 팝업 상태 관리
+
+  const recommendQuestions = [
+    'How can I invest my savings?',
+    'What is the best way to budget?',
+    'Can you help me save for retirement?',
+    'What are some good investment strategies?',
+  ];
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -47,25 +54,48 @@ export default function ChatBot() {
     setIsModalOpen(false); // 팝업 닫기
   };
 
+  const handleRecommendedQuestionClick = (question: string) => {
+    setInput(question);
+  };
+
   return (
     <div className="container">
-      <div className="header">
-        FinBuddy
-      </div>
+      <div className="header">FinBuddy</div>
+    
+      {/* 메시지가 없을 때 로고 보여주기 */}
+      {messages.length === 0 && (
+        <div className="logo-container">
+          <CurrencyDollarIcon className="logo-icon" />
+          <p className="logo-text">FinBuddy</p>
+        </div>
+      )}
+
+      {/* 추천 질문 버튼들 */}
+      {!messages.length && (
+        <div className="recommended-questions">
+          {recommendQuestions.map((question, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleRecommendedQuestionClick(question)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              className="recommended-question-button"
+            >
+              {question}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="chat-box">
         <div className="message-container">
           {messages.map((msg, idx) => (
             <div key={idx} style={{ marginBottom: '8px' }}>
-              <p className="user-message">
-                {msg.user}
-              </p>
-              <p className="bot-message">
-                {msg.bot || 'Typing...'}
-              </p>
+              <p className="user-message">{msg.user}</p>
+              <p className="bot-message">{msg.bot || 'Typing...'}</p>
             </div>
           ))}
         </div>
+
         <div className="input-container">
           <input
             type="text"
@@ -75,11 +105,8 @@ export default function ChatBot() {
             className="input-field"
             placeholder="Type a message..."
           />
-          <button
-            onClick={sendMessage}
-            className="send-button"
-          >
-            <MagnifyingGlassIcon className="h-5 w-5 mr-2" /> {/* 돋보기 아이콘 */}
+          <button onClick={sendMessage} className="send-button">
+            <MagnifyingGlassIcon className="h-5 w-5 mr-2" />
             Send
           </button>
         </div>
@@ -88,7 +115,7 @@ export default function ChatBot() {
       {/* 채팅 초기화 버튼 */}
       <div className="clear-chat-container">
         <button onClick={showModal} className="clear-chat-button">
-          <TrashIcon className="h-5 w-5 mr-2" /> {/* 쓰레기통통 아이콘 */}
+          <TrashIcon className="h-5 w-5 mr-2" />
           Clear Chat
         </button>
       </div>
