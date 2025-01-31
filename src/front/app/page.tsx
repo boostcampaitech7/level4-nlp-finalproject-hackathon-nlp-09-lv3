@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid'; // Heroicons에서 아이콘 import
+import './styles.css'; // CSS 파일 import
 
 export default function ChatBot() {
   const [messages, setMessages] = useState<{ user: string; bot: string }[]>([]);
   const [input, setInput] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // 팝업 상태 관리
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -31,39 +34,81 @@ export default function ChatBot() {
     );
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    setIsModalOpen(false); // 팝업 닫기
+  };
+
+  const showModal = () => {
+    setIsModalOpen(true); // 팝업 열기
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false); // 팝업 닫기
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow p-6 space-y-4">
-        <h1 className="text-xl font-bold text-center">ChatBot</h1>
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+    <div className="container">
+      <div className="header">
+        FinBuddy
+      </div>
+
+      <div className="chat-box">
+        <div className="message-container">
           {messages.map((msg, idx) => (
-            <div key={idx} className="space-y-1">
-              <p className="text-blue-500">
-                <strong>User:</strong> {msg.user}
+            <div key={idx} style={{ marginBottom: '8px' }}>
+              <p className="user-message">
+                {msg.user}
               </p>
-              <p className="text-gray-700">
-                <strong>Bot:</strong> {msg.bot || 'Typing...'}
+              <p className="bot-message">
+                {msg.bot || 'Typing...'}
               </p>
             </div>
           ))}
         </div>
-        <div className="flex space-x-2">
+        <div className="input-container">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            className="flex-1 border border-gray-300 rounded-lg p-2"
+            className="input-field"
             placeholder="Type a message..."
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-500 text-white rounded-lg px-4 py-2"
+            className="send-button"
           >
+            <MagnifyingGlassIcon className="h-5 w-5 mr-2" /> {/* 돋보기 아이콘 */}
             Send
           </button>
         </div>
       </div>
+
+      {/* 채팅 초기화 버튼 */}
+      <div className="clear-chat-container">
+        <button onClick={showModal} className="clear-chat-button">
+          <TrashIcon className="h-5 w-5 mr-2" /> {/* 빗자루 아이콘 */}
+          Clear Chat
+        </button>
+      </div>
+
+      {/* 팝업 */}
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <p>지금까지 나눈 모든 채팅이 사라집니다.</p>
+            <div className="modal-buttons">
+              <button onClick={clearChat} className="modal-button confirm">
+                초기화
+              </button>
+              <button onClick={closeModal} className="modal-button cancel">
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
