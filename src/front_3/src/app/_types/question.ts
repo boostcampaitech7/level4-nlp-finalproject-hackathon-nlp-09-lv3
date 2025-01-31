@@ -1,4 +1,5 @@
 export interface QAndA {
     question: string
-    answer: string
+    answer: string | null
+    error?: boolean
 }

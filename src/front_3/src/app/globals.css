@@ -5,13 +5,30 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #4A90E2;
+  --secondary: #F5F5F5;
+  --chat-user: #F5F5F5;
+  --chat-ai: #ffffff;
+  --button: #4A90E2;
+  --button-hover: #357ABD;
+  --example-box: #F5F5F5;
+  --example-box-hover: #E8E8E8;
+  --icon-color: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme='dark'] {
+  --background: #1E1E1E;
+  --foreground: #ffffff;
+  --primary: #4A90E2;
+  --secondary: #2C2C2C;
+  --chat-user: #2C2C2C;
+  --chat-ai: #1E1E1E;
+  --chat-text: #ffffff; 
+  --button: #2C2C2C;
+  --button-hover: #3C3C3C;
+  --example-box: #2C2C2C;
+  --example-box-hover: #3C3C3C;
+  --icon-color: #ffffff;
 }
 
 body {
