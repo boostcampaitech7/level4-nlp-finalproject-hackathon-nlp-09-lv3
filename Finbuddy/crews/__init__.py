@@ -1,4 +1,4 @@
-from .blog_crew import BlogCrew
+from .crew import Service
 
-def Get_Blog_Crew():
-    return BlogCrew().blog_crew()
+def Get_visual():
+    return Service().processing_crew()

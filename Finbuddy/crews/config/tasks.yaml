@@ -19,20 +19,24 @@
 #     주어진 뉴스의 중요한 정보만을 담은 200자 이내의 요약
 #   agent: summary_agent
 
-search_task:
-  description: > 
-    최신 AI 및 데이터사이언스의 연구 동향을 찾고 내용을 가져오세요.
-    Key trends와 획기적인 기술, 산업의 잠재성을 함께 기술하세요.
-    당신의 대답은 반드시 full analysis report여야 합니다.
-  expected_output: >
-    AI와 데이터사이언스의 최신 연구 동향에 대한 상세한 분석 리포트
-  agent: researcher
-
-write_task:
+retrieve_task:
   description: >
-    제공된 정보들을 바탕으로 최신 AI 트렌드를 강조하는 블로그 포스트를 작성하세요.
-    당신의 포스트는 유용한 정보를 담고 있어야 하며, AI에 대해 잘 모르는 일반인도 이해할 수 있어야 합니다.
-    최종 답변은 반드시 2개 이상의 paragraph를 담고 있는 완전한 블로그 포스트여야 합니다.
+    사용자의 질의에 대해 Vector DB에서 관련 정보를 검색하세요.
+    표와 이미지의 경로를 함께 제공해야 합니다.
   expected_output: >
-    일반인도 이해하기 쉬운 AI 트렌드 블로그 포스트
-  agent: writer
+    질의와 관련된 정확한 정보 및 데이터, 표와 이미지 경로 포함
+  agent: retriever
+
+code_generation_task:
+  name: "code_generation_task"
+  description: "초기 쿼리와 테이블 데이터를 기반으로 시각화 코드를 생성"
+  input:
+    - "search_query"
+    - "table_data"
+  output: "generated_code"
+
+code_execution_task:
+  name: "code_execution_task"
+  description: "생성된 코드를 실행하여 시각화 이미지를 생성하고 저장"
+  input: "generated_code"
+  output: "visualization_image_path"
