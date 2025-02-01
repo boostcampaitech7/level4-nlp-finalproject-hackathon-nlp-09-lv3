@@ -1,0 +1,27 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# \ub370\uc774\ud130 \ud14c\uc774\ube14 \uc0dd\uc131
+data = dict()
+data["\uae30\uac04"] = ["1\uac1c\uc6d4", "6\uac1c\uc6d4", "12\uac1c\uc6d4"]
+data["\uc808\ub300\uc8fc\uac00"] = [21.2, 10.2, 56.3]
+data["\uc0c1\ub300\uc8fc\uac00"] = [23.6, 14.3, 44.3]
+df = pd.DataFrame(data)
+
+# \ud55c\uae00 \ud3f0\ud2b8 \uc124\uc815
+plt.rc("font", family="NanumGothic")
+
+# \uc2dc\uac01\ud654
+plt.figure(figsize=(10, 6))
+plt.plot(df["\uae30\uac04"], df["\uc808\ub300\uc8fc\uac00"], marker="o", label="\uc808\ub300\uc8fc\uac00 \uc218\uc775\ub960", color="b")
+plt.plot(df["\uae30\uac04"], df["\uc0c1\ub300\uc8fc\uac00"], marker="o", label="\uc0c1\ub300\uc8fc\uac00 \uc218\uc775\ub960", color="r")
+
+plt.title("SK\ud558\uc774\ub2c9\uc2a4\uc758 \uc8fc\uae30\uc218\uc775\ub960 \ubcc0\ud654")
+plt.xlabel("\uae30\uac04")
+plt.ylabel("\uc218\uc775\ub960 (%)")
+plt.legend()
+plt.grid(true)
+
+# \uc800\uc7a5
+plt.savefig("output/SK_Hynix_Core_Business_Returns.png")
+plt.show()
