@@ -11,3 +11,7 @@ pdfplumber==0.11.5
 requests==2.32.3
 crewai==0.98.0
 crewai-tools
+matplotlib==3.10.0
+Pillow==11.1.0
+pytesseract==0.3.13
+markdown==3.7
