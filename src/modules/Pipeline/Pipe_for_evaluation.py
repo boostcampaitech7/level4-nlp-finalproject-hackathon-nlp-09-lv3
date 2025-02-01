@@ -4,7 +4,7 @@ import pandas as pd
 from utils import get_only_paragraphs, create_documents
 import os
 from retrievals import bm25, dpr, ensemble
-from QA_model import GPTModel, Qwen14BModel, Qwen32BModel, ExaoneModel
+from QA_model import GPTModel, Qwen14BModel, Qwen32BModel, ExaoneModel, HyperClovaModel
 from tqdm import tqdm
 from evaluation import G_generation_evaluate, G_retrieval_evaluate
 
@@ -18,13 +18,13 @@ class Pipeline_For_Eval:
         self.verbose = verbose
         self.collection_name = collection_name
         self.persist_directory = persist_directory
-        folder_name = 'DB' + '_' + mode
+        folder_name = 'Eval_DB_' + mode
         self.topk = topk
         self.model = None
 
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
             print('생성된 DB가 있어 로드합니다.')
-            DB = ChromaDB(collection_name, persist_directory, mode = mode)
+            DB = ChromaDB(collection_name, persist_directory, emb_model = mode, mode = 'eval')
             BASE_DIR = './modules/datas' # 데이터가 저장돼 있는 루트를 의미합니다.
             df = get_only_paragraphs(BASE_DIR)
             documents = create_documents(df)
@@ -35,7 +35,7 @@ class Pipeline_For_Eval:
             BASE_DIR = './modules/datas' # 데이터가 저장돼 있는 루트를 의미합니다.
             df = get_only_paragraphs(BASE_DIR)
             documents = create_documents(df)
-            DB = ChromaDB(collection_name, persist_directory, mode = mode)
+            DB = ChromaDB(collection_name, persist_directory, emb_model = mode, mode = 'eval')
             DB.create_and_add(documents,)
             self.db = DB.verify_db()
 
@@ -57,6 +57,8 @@ class Pipeline_For_Eval:
                 self.model = Qwen32BModel()
             elif model == 'Exaone':
                 self.model = ExaoneModel()
+            elif model == 'HyperClova':
+                self.model = HyperClovaModel()
             else:
                 print('''가능한 모델을 입력하세용
                     1. GPT
