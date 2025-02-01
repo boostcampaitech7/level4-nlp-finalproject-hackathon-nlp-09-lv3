@@ -2,6 +2,7 @@
 # from .crew_table_processing import TableProcessingCrew
 #from .analysis_crew import AnalysisCrew
 from .crew_retrieval import RetrievalCrew
+from .crew_test import TestCrew
 
 # def Get_Blog_Crew():
 #     return BlogCrew().blog_crew()
@@ -12,5 +13,8 @@ from .crew_retrieval import RetrievalCrew
 # def Get_Analysis_Crew():
 #     return AnalysisCrew().analysis_crew()
 
-def Get_Retrieval_Crew():
-    return RetrievalCrew().crew_retrieval()
+# def get_retrieval_crew():
+#     return RetrievalCrew().retrieval_crew()
+
+def get_test_crew():
+    return TestCrew().test_crew()
