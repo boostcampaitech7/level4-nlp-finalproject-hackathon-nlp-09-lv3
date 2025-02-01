@@ -1,42 +1,73 @@
+# retrieval_task:
+#   description: >
+#     주어진 Retrieval 결과를 활용하고 데이터를 검색하여 Table, Graph, Context 분석가에게 전달하세요.
+#     결과는 분석에 필요한 필수 정보가 포함되어야 합니다.
+#     질문 : {query}
+#     제공된 context : {context}
+#     제공된 image : {image}
+#     제공된 table : {table}
+#   expected_output: >
+#     분석가들이 사용할 수 있는 Retrieval 결과 데이터
+#   agent: retrieval_agent
+
+# table_conversion_task:
+#   description: >
+#     주어진 Table 데이터를 pandas의 Dataframe으로 변환하세요.
+#     변환 결과는 가독성이 좋아야 하며 분석에 적합해야 합니다.
+#   expected_output: >
+#     pandas Dataframe 형식의 변환된 Table 데이터
+#   agent: table_changer
+
+table_analysis_task:
+  description: >
+    변환된 Table 데이터를 분석하고 유용한 정보를 정리하세요.
+    분석 결과는 데이터의 주요 인사이트를 포함해야 합니다.
+    질문 : {query}
+    제공된 table : {table}
+  expected_output: >
+    Table 데이터를 분석하여 도출된 주요 인사이트
+  agent: table_agent
+
+graph_analysis_task:
+  description: >
+    주어진 Graph 이미지를 분석하고 유용한 정보를 도출하세요.
+    분석 결과는 그래프에서 파악된 주요 트렌드와 데이터를 포함해야 합니다.
+    질문 : {query}
+    제공된 image : {image}
+  expected_output: >
+    Graph 분석 결과 및 주요 트렌드
+  agent: graph_agent
+
+context_analysis_task:
+  description: >
+    제공된 Context 데이터를 분석하여 유용한 정보를 정리하세요.
+    분석 결과는 사용자에게 바로 전달할 수 있을 만큼 명확해야 합니다.
+    질문 : {query}
+    제공된 context : {context}
+  expected_output: >
+    Context 데이터를 분석한 주요 정보 요약
+  agent: context_agent
+
 # visualization_task:
 #   description: >
-#     데이터가 주어지면 사용자가 알아보기 쉽게 시각화하는 도구입니다.
+#     분석된 데이터를 바탕으로 적합한 시각화 자료를 생성하세요.
+#     시각화 자료는 직관적이고 사용자 친화적이어야 합니다.
 #   expected_output: >
-#     주어진 데이터에 대한 시각화된 그래프
-#   agent: visualization_agent
+#     분석 결과를 보여주는 직관적인 시각화 자료
+#   agent: visualizer
 
-# news_collectiong_task:
+# code_execution_task:
 #   description: >
-#     주어진 토픽에 대한 가장 관련성 있는 뉴스를 검색합니다.
+#     분석가가 제공한 코드를 실행하고, 실행 결과를 반환하여 결과를 사용자에게 전달합니다.
 #   expected_output: >
-#     주어진 토픽에 대한 관련성 높은 뉴스 5개
-#   agent: news_collector_agent
+#     실행된 코드의 결과물, 예: 시각화된 차트, 분석된 데이터, 보고서 등
+#   agent: code_executor
 
-# summarization_task:
-#   description: >
-#     주어진 뉴스 정보들을 요약합니다.
-#   expected_output: >
-#     주어진 뉴스의 중요한 정보만을 담은 200자 이내의 요약
-#   agent: summary_agent
-
-retrieve_task:
+answer_task:
   description: >
-    사용자의 질의에 대해 Vector DB에서 관련 정보를 검색하세요.
-    표와 이미지의 경로를 함께 제공해야 합니다.
+    제공된 정보들을 바탕으로 최신 AI 트렌드를 강조하는 블로그 포스트를 작성하세요.
+    당신의 포스트는 유용한 정보를 담고 있어야 하며, AI에 대해 잘 모르는 일반인도 이해할 수 있어야 합니다.
+    최종 답변은 반드시 2개 이상의 paragraph를 담고 있는 완전한 블로그 포스트여야 합니다.
   expected_output: >
-    질의와 관련된 정확한 정보 및 데이터, 표와 이미지 경로 포함
-  agent: retriever
-
-code_generation_task:
-  name: "code_generation_task"
-  description: "초기 쿼리와 테이블 데이터를 기반으로 시각화 코드를 생성"
-  input:
-    - "search_query"
-    - "table_data"
-  output: "generated_code"
-
-code_execution_task:
-  name: "code_execution_task"
-  description: "생성된 코드를 실행하여 시각화 이미지를 생성하고 저장"
-  input: "generated_code"
-  output: "visualization_image_path"
+    일반인도 이해하기 쉬운 AI 트렌드 블로그 포스트
+  agent: writer

@@ -6,12 +6,12 @@ from embedding_models.kf_deberta_embedding import KF_DeBERTa_EmbeddingModel
 from embedding_models.kure_embedding import KURE_EmbeddingModel
 from embedding_models.openai_embedding import OpenAI_EmbeddingModel
 from chromadb import Client
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain.schema import Document 
 
 
 class ChromaDB:
-    def __init__(self, collection_name: str, persist_directory: str,  mode = 'NaverCloudEmb'):
+    def __init__(self, collection_name: str, persist_directory: str, emb_model= 'NaverCloudEmb', mode = 'eval'):
         """
         Initialize the ChromaDB class.
         
@@ -22,27 +22,49 @@ class ChromaDB:
         self.persist_directory = persist_directory
 
         self.db = None
-        if mode == 'NaverCloudEmb':
-            self.embedding_function = NaverCloud_EmbeddingModel()
-            self.persist_directory += '/DB_NaverCloudEmb'
-        elif mode == 'KF_DebertaEmb':
-            self.embedding_function = KF_DeBERTa_EmbeddingModel()
-            self.persist_directory += '/DB_KF_DebertaEmb'
-        elif mode == 'Kure_Emb':
-            self.embedding_function = KURE_EmbeddingModel()
-            self.persist_directory += '/DB_Kure_Emb'
-        elif mode == 'OpenAI_Emb':
-            self.embedding_function = OpenAI_EmbeddingModel()
-            self.persist_directory += '/OpenAI_Emb'
-        else:
-            print('''가능한 임베딩 모델이 아닙니다.
-                  [가능한 모델]
-                  1. NaverCloudEmb
-                  2. KF_DebertaEmb
-                  3. Kure_Emb''')
-            return
-
-        self.mode = mode
+        if mode == 'eval':
+            if emb_model == 'NaverCloudEmb':
+                self.embedding_function = NaverCloud_EmbeddingModel()
+                self.persist_directory += '/Eval_DB_NaverCloudEmb'
+            elif emb_model == 'KF_DebertaEmb':
+                self.embedding_function = KF_DeBERTa_EmbeddingModel()
+                self.persist_directory += '/Eval_DB_KF_DebertaEmb'
+            elif emb_model == 'Kure_Emb':
+                self.embedding_function = KURE_EmbeddingModel()
+                self.persist_directory += '/Eval_DB_Kure_Emb'
+            elif emb_model == 'OpenAI_Emb':
+                self.embedding_function = OpenAI_EmbeddingModel()
+                self.persist_directory += '/Eval_OpenAI_Emb'
+            else:
+                print('''가능한 임베딩 모델이 아닙니다.
+                    [가능한 모델]
+                    1. NaverCloudEmb
+                    2. KF_DebertaEmb
+                    3. Kure_Emb
+                    4. OpenAI_Emb''')
+                return
+        elif mode == 'service':
+            if emb_model == 'NaverCloudEmb':
+                self.embedding_function = NaverCloud_EmbeddingModel()
+                self.persist_directory += '/Service_DB_NaverCloudEmb'
+            elif emb_model == 'KF_DebertaEmb':
+                self.embedding_function = KF_DeBERTa_EmbeddingModel()
+                self.persist_directory += '/Service_DB_KF_DebertaEmb'
+            elif emb_model == 'Kure_Emb':
+                self.embedding_function = KURE_EmbeddingModel()
+                self.persist_directory += '/Service_DB_Kure_Emb'
+            elif emb_model == 'OpenAI_Emb':
+                self.embedding_function = OpenAI_EmbeddingModel()
+                self.persist_directory += '/Service_DB_OpenAI_Emb'
+            else:
+                print('''가능한 임베딩 모델이 아닙니다.
+                    [가능한 모델]
+                    1. NaverCloudEmb
+                    2. KF_DebertaEmb
+                    3. Kure_Emb
+                    4. OpenAI_Emb''')
+                return
+        self.emb_model = emb_model
 
     def create_and_add(self, documents):
         """
@@ -69,7 +91,7 @@ class ChromaDB:
 
             print(f"Adding batch {i // batch_size + 1} of {len(documents) // batch_size + 1}...")
             self.db.add_documents(batch)
-            if self.mode == 'NaverCloudEmb':
+            if self.emb_model == 'NaverCloudEmb':
                 time.sleep(5)  # 네이버클라우드 임베딩모델일때만
         
         # Persist the database
