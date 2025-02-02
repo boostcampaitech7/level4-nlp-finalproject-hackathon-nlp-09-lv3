@@ -17,7 +17,7 @@ class ContextCrew:
         return Agent(
             config = self.agents_config['context_analyzer'],
             verbose = True,
-            llm = 'gpt-4o',
+            llm = 'gpt-4o-mini',
         )
     @task
     def context_analysis_task(self) -> Task:

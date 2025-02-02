@@ -13,15 +13,15 @@ code_generate_task:
     만약 제공받은 테이블이 없다면, 아무것도 출력하지 않음
   agent: code_generator
 
-code_execution_task:
+code_analyze_task:
   description: >
-    code_generator가 생성한 시각화 코드를 검토 후 실행
+    code_generator가 생성한 시각화 코드를 검토
     파이썬 시각화 코드에 오류가 생기지 않도록 각별히 주의해야 함
     코드 실행 도구를 사용할 때에는 시각화 코드를 일부만 사용하지 않고 완전한 형태로 넣어야 함
     질문: {query}
   expected_output: >
-    코드를 실행하여 생성된 시각화 그래프가 저장된 경로
-  agent: code_executor
+    실행하는 데에 문제가 없는 완전한 형태의 코드
+  agent: code_analyzer
   context: [code_generate_task]
 
 table_answer_task:
@@ -30,11 +30,25 @@ table_answer_task:
     코드에 대한 해설은 필요 없음
     개발에 대해 잘 알지 못하는 사용자가 이해할 수 있도록 쉽게 설명되어야 함
     질문: {query}
-
   expected_output: >
     사용자가 질문한 내용에 대한 상세하고 도움이 되는 친절한 답변
     답변의 끝에는 생성된 이미지 파일의 이름을 명시해야 함
   agent: table_answerman
-  context: [code_generate_task, code_execution_task]
+  context: [code_generate_task, code_analyze_task]
+
+
+
+
+      # # Markdown 코드 블록에서 코드만 추출 (```python ~ ``` 사이의 내용)
+    # code_block_match = re.search(r"```(?:python)?\n(.*?)\n```", code_str, re.DOTALL)
+    # if code_block_match:
+    #     code_str = code_block_match.group(1)
+    # else:
+    #     # 만약 코드 블록이 발견되지 않으면, 앞뒤의 ```를 제거
+    #     code_str = code_str.strip()
+    #     code_str = re.sub(r"^```(?:python)?\s*\n", "", code_str)
+    #     code_str = re.sub(r"\n```$", "", code_str)
+
+    # 임시 파이썬 파일에 코드 저장
 
 

@@ -17,7 +17,7 @@ class ImageCrew:
         return Agent(
             config = self.agents_config['graph_analyzer'],
             verbose = True,
-            llm = 'gpt-4o',
+            llm = 'gpt-4o-mini',
         )
     @task
     def graph_analysis_task(self) -> Task:

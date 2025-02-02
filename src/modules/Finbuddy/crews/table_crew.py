@@ -21,15 +21,14 @@ class TableCrew:
         return Agent(
             config = self.agents_config['code_generator'],
             verbose = True,
-            llm = 'gpt-4o',
+            llm = 'gpt-4o-mini',
         )
     @agent
-    def code_executor(self) -> Agent:
+    def code_analyzer(self) -> Agent:
         return Agent(
-            config = self.agents_config['code_executor'],
+            config = self.agents_config['code_analyzer'],
             verbose = True,
-            llm = 'gpt-4o',
-            tools = [code_executetool.execute_code],
+            llm = 'gpt-4o-mini',
             
         )
     @agent
@@ -37,20 +36,24 @@ class TableCrew:
         return Agent(
             config = self.agents_config['table_answerman'],
             verbose = True,
-            llm = 'gpt-4o',
+            llm = 'gpt-4o-mini',
         )
 
     @task
     def code_generate_task(self) -> Task:
         return Task(
             config = self.tasks_config['code_generate_task'],
-            output_pydantic=Codeoutput
+            output_pydantic=Codeoutput,
+            delegations=True
+
         )
 
     @task
-    def code_execution_task(self) -> Task:
+    def code_analyze_task(self) -> Task:
         return Task(
-            config = self.tasks_config['code_execution_task'],
+            config = self.tasks_config['code_analyze_task'],
+            output_pydantic=Codeoutput,
+            delegations= True
         )
 
     @task
