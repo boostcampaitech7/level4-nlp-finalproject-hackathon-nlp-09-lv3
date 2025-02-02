@@ -1,27 +1,33 @@
 import matplotlib.pyplot as plt
-import pandas as pd
+import numpy as np
 
-# \ub370\uc774\ud130 \ud14c\uc774\ube14 \uc0dd\uc131
-data = dict()
-data["\uae30\uac04"] = ["1\uac1c\uc6d4", "6\uac1c\uc6d4", "12\uac1c\uc6d4"]
-data["\uc808\ub300\uc8fc\uac00"] = [21.2, 10.2, 56.3]
-data["\uc0c1\ub300\uc8fc\uac00"] = [23.6, 14.3, 44.3]
-df = pd.DataFrame(data)
+# \ub370\uc774\ud130 \uc124\uc815
+labels = ["1\uac1c\uc6d4", "6\uac1c\uc6d4", "12\uac1c\uc6d4"]
+absolute_returns = [21.2, 10.2, 56.3]
+relative_returns = [23.6, 14.3, 44.3]
+x = np.arange(len(labels))
+width = 0.35
 
-# \ud55c\uae00 \ud3f0\ud2b8 \uc124\uc815
+# \uadf8\ub798\ud504 \uc124\uc815
 plt.rc("font", family="NanumGothic")
+fig, ax = plt.subplots()
 
-# \uc2dc\uac01\ud654
-plt.figure(figsize=(10, 6))
-plt.plot(df["\uae30\uac04"], df["\uc808\ub300\uc8fc\uac00"], marker="o", label="\uc808\ub300\uc8fc\uac00 \uc218\uc775\ub960", color="b")
-plt.plot(df["\uae30\uac04"], df["\uc0c1\ub300\uc8fc\uac00"], marker="o", label="\uc0c1\ub300\uc8fc\uac00 \uc218\uc775\ub960", color="r")
+# \ubc14 \ucc28\ud2b8 \uc0dd\uc131
+rects1 = ax.bar(x - width/2, absolute_returns, width, label="\uc808\ub300\uc8fc\uac00")
+rects2 = ax.bar(x + width/2, relative_returns, width, label="\uc0c1\ub300\uc8fc\uac00")
 
-plt.title("SK\ud558\uc774\ub2c9\uc2a4\uc758 \uc8fc\uae30\uc218\uc775\ub960 \ubcc0\ud654")
-plt.xlabel("\uae30\uac04")
-plt.ylabel("\uc218\uc775\ub960 (%)")
-plt.legend()
-plt.grid(true)
+# \uc81c\ubaa9\uacfc \ucd95 \ub77c\ubca8 \uc9c0\uc815
+ax.set_ylabel("\uc8fc\uae30 \uc218\uc775\ub960(%)")
+ax.set_title("SK\ud558\uc774\ub2c9\uc2a4 \uc8fc\uae30 \uc218\uc775\ub960 \ube44\uad50")
+ax.set_xticks(x)
+ax.set_xticklabels(labels)
+ax.legend()
 
-# \uc800\uc7a5
-plt.savefig("output/SK_Hynix_Core_Business_Returns.png")
+# \uadf8\ub798\ud504 \ub808\uc774\uc544\uc6c3 \ucd5c\uc801\ud654
+fig.tight_layout()
+
+# \uadf8\ub798\ud504 \uc800\uc7a5
+plt.savefig("output/SK\ud558\uc774\ub2c9\uc2a4_\uc8fc\uae30\uc218\uc775\ub960.png")
+
+# \uadf8\ub798\ud504 \ud45c\uc2dc
 plt.show()
