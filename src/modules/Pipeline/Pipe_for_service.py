@@ -1,14 +1,11 @@
-import re
 from DB.chromadb_storing import ChromaDB
 from utils import get_all_datas, create_documents
 import os
 from retrievals import bm25, dpr, ensemble
-from QA_model import GPTModel
 from tqdm import tqdm
 import json
 import subprocess
 import tempfile
-import asyncio
 
 from Finbuddy import crews
 
@@ -80,16 +77,19 @@ class Pipeline_For_Service:
         search_type = 'mmr'
         self.ensemble_retriever = ensemble(retrievals, topk = topk, weights = weights, search_type = search_type)
 
-    def setup(self, model = 'gpt-4o-mini'):
-        if model == 'gpt-4o-mini':
-            self.model = GPTModel(model_name = 'gpt-4o-mini')
-        elif model == 'gpt-4o':
-            self.model = GPTModel(model_name = 'gpt-4o')
+    def setup(self,):
         self.context_crew = crews.get_context_crew()
         self.image_crew = crews.get_image_crew()
         self.table_crew = crews.get_table_crew()
         self.final_crew = crews.get_final_crew()
+        self.news_crew = crews.get_news_crew()
 
+        if not self.verbose:
+            for crew in [self.context_crew, self.image_crew, self.table_crew, self.final_crew, self.news_crew]:
+                crew.verbose = False
+                for agent in crew.agents:
+                    agent.verbose = False
+                    
         output_dir = "output"
         # 폴더가 없으면 생성
         os.makedirs(output_dir, exist_ok=True)
@@ -114,85 +114,73 @@ class Pipeline_For_Service:
                 print(i)
         return result[:self.topk]
     
-    async def A(self, query, retrieval_results):
-        inputs = {
-            'query': query,
-            'paragraphs': [],
-            'images': {'image_route': [], 'summary': []},
-            'tables': {'table': [], 'summary': []},
-        }
-        
+    def A(self, query, retrieval_results):
+        paragraph = False
+        image = False
+        table = False
+        inputs = {'query' : query, 'paragraphs': [],
+                                    'images': {'image_route' : [], 'summary' : []},
+                                    'tables': {'table': [], 'summary' : []}, }
         for i, doc in enumerate(retrieval_results):
             if doc.metadata['type'] == 'paragraph':
                 inputs['paragraphs'].append(doc.metadata['original_content'])
+                paragraph = True
+
             elif doc.metadata['type'] == 'figure':
                 inputs['images']['image_route'].append(doc.metadata['image_route'])
                 inputs['images']['summary'].append(doc.page_content)
+                image = True
+
             elif doc.metadata['type'] == 'table':
                 inputs['tables']['table'].append(doc.metadata['table'])
                 inputs['tables']['summary'].append(doc.page_content)
-        
-        # kickoff을 비동기적으로 실행
-        context_result = await asyncio.to_thread(self.context_crew.kickoff, inputs=inputs)
-        image_result = await asyncio.to_thread(self.image_crew.kickoff, inputs=inputs)
-        
-        togle = True
-        while togle:
-            try:
-                table_result = await asyncio.to_thread(self.table_crew.kickoff, inputs=inputs)
-                visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
-                await asyncio.to_thread(execute_code, visualize_code)
-                togle = False
-            except:
-                togle = True
-        
-        final_result = await asyncio.to_thread(
-            self.final_crew.kickoff,
-            inputs={'context_result': context_result.raw,
-                    'table_result': table_result.raw,
-                    'image_result': image_result.raw}
-        )
-        
-        return final_result.raw
-    # def A(self, query, retrieval_results):
-
-    #     inputs = {'query' : query, 'paragraphs': [],
-    #                               'images': {'image_route' : [], 'summary' : []},
-    #                               'tables': {'table': [], 'summary' : []}, }
-    #     for i, doc in enumerate(retrieval_results):
-    #         if doc.metadata['type'] == 'paragraph':
-    #             inputs['paragraphs'].append(doc.metadata['original_content'])
-
-    #         elif doc.metadata['type'] == 'figure':
-    #             inputs['images']['image_route'].append(doc.metadata['image_route'])
-    #             inputs['images']['summary'].append(doc.page_content)
-
-    #         elif doc.metadata['type'] == 'table':
-    #             inputs['tables']['table'].append(doc.metadata['table'])
-    #             inputs['tables']['summary'].append(doc.page_content)
+                table = True
                 
-    #         else:
-    #             pass
-
-    #     context_result = self.context_crew.kickoff(inputs = inputs)
-    #     image_result = self.image_crew.kickoff(inputs = inputs)
-    #     togle = True
-    #     while togle:
-    #         try:
-    #             table_result = self.table_crew.kickoff(inputs = inputs)
-    #             visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
-    #             execute_code(visualize_code)
-    #             togle = False
-    #         except:
-    #             togle = True
-    #     final_result = self.final_crew.kickoff(inputs = {'context_result': context_result.raw,
-    #                                                     'table_result' : table_result.raw,
-    #                                                     'image_result' : image_result.raw})
+            else:
+                pass
+        if paragraph:
+            context_result = self.context_crew.kickoff(inputs = inputs).raw
+        else:
+            context_result = ''
+        if image:
+            image_result = self.image_crew.kickoff(inputs = inputs).raw
+        else:
+            image_result = ''
+        if table:
+            togle = True
+            while togle:
+                try:
+                    table_result = self.table_crew.kickoff(inputs = inputs)
+                    visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
+                    if self.verbose:
+                        print(visualize_code)
+                    execute_code(visualize_code)
+                    table_result = table_result.raw
+                    togle = False
+                except:
+                    togle = True
+        else:
+            table_result = ''
+        final_result = self.final_crew.kickoff(inputs = {'context_result': context_result,
+                                                        'table_result' : table_result,
+                                                        'image_result' : image_result})
             
-    #     return final_result.raw
-    
-    def QA(self, query:str, mode = 'ensemble'):
-        retrieval_results = self.Q(query, mode = mode)
-        answer = self.A(query, retrieval_results,)
+        return final_result.raw
 
+
+    def news_search_A(self, query):
+        inputs = {'query': query}
+        answer = self.news_crew.kickoff(inputs = inputs)
+        return answer.raw
+    
+    def QA(self, query:str, mode = 'ensemble', search_type = 'closed_domain'):
+        if search_type == 'closed_domain':
+            A = self.A
+            retrieval_results = self.Q(query, mode = mode)
+            answer = A(query, retrieval_results,)
+        elif search_type == 'open_domain':
+            A = self.news_search_A
+            answer = A(query)
         return answer
+
+

@@ -9,7 +9,6 @@ class ImageCrew:
 
     @before_kickoff
     def before_kickoff_function(self, inputs):
-        print(f"Before kickoff function with inputs: {inputs}")
         return inputs # You can return the inputs or modify them as needed
 
     @agent
