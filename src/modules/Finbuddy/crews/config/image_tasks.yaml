@@ -1,16 +1,13 @@
 graph_analysis_task:
   description: >
-    주어진 이미지를 분석하고 유용한 정보를 도출하세요.
-    분석 결과는 그래프에서 파악된 주요 트렌드와 데이터를 포함해야 합니다.
+    주어진 이미지에 대한 정보를 분석하고 사용자의 질문에 맞는 유용한 정보를 도출하세요.
+    분석 결과는 그래프에서 파악된 내용을 바탕으로 사용자의 질문에 가장 도움이 되어야 합니다.
     질문 : {query}
-    제공된 image : {images[image_route]}
     이미지에 대한 정보 : {images[summary]}
   expected_output: >
     사용자의 질문에 가장 도움이 되는 이미지 분석 정보
-    답변의 끝에는 제공받은 이미지의 경로를 전부 기재해야 함
-    만약 받은 이미지가 없다면 주어진 이미지 없음이라고 출력
   agent: graph_analyzer
- 
+
 # graph_answer_task:
 #   description: >
 #     이미지 분석 정보를 바탕으로 사용자의 질문에 가장 도움이 되는 정보를 전달합니다.
@@ -18,4 +15,4 @@ graph_analysis_task:
 #     질문 : {query}
 #   expected_output: >
 #     사용자의 질문에 가장 도움이 되는 이미지 분석 정보
-#   agent: graph_answerman
+#   agent: graph_answerman 

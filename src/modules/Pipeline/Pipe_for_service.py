@@ -6,8 +6,9 @@ from tqdm import tqdm
 import json
 import subprocess
 import tempfile
-
+import unicodedata
 from Finbuddy import crews
+
 
 def execute_code(code_str: str, ):
     """
@@ -118,23 +119,24 @@ class Pipeline_For_Service:
         paragraph = False
         image = False
         table = False
-        inputs = {'query' : query, 'paragraphs': [],
-                                    'images': {'image_route' : [], 'summary' : []},
-                                    'tables': {'table': [], 'summary' : [], 'image_route': []}, }
+        inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : []},
+                                    'images': {'image' : [], 'summary' : [], 'file_name' : []},
+                                    'tables': {'table': [], 'summary' : [], 'file_name': []}, }
         for i, doc in enumerate(retrieval_results):
             if doc.metadata['type'] == 'paragraph':
-                inputs['paragraphs'].append(doc.metadata['original_content'])
+                inputs['paragraphs']['paragraph'].append(doc.metadata['original_content'])
+                inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFC",(doc.metadata['file_name'])))
                 paragraph = True
 
             elif doc.metadata['type'] == 'figure':
-                inputs['images']['image_route'].append(doc.metadata['image_route'])
+                inputs['images']['file_name'].append(unicodedata.normalize("NFC", doc.metadata['file_name']))
                 inputs['images']['summary'].append(doc.page_content)
                 image = True
 
             elif doc.metadata['type'] == 'table':
                 inputs['tables']['table'].append(doc.metadata['table'])
                 inputs['tables']['summary'].append(doc.page_content)
-                inputs['tables']['image_route'].append(doc.metadata['image_route'])
+                inputs['tables']['file_name'].append(unicodedata.normalize("NFC",doc.metadata['file_name']))
                 table = True
                 
             else:
@@ -165,14 +167,16 @@ class Pipeline_For_Service:
         final_result = self.final_crew.kickoff(inputs = {'context_result': context_result,
                                                         'table_result' : table_result,
                                                         'image_result' : image_result})
-        if image:
-            final_result = final_result.raw + "\n\n제공받은 테이블 경로: \n"
-            # 리스트에 있는 테이블 경로들을 "1 : 경로1, 2 : 경로2, 3 : 경로3" 형태의 문자열로 생성
-            table_str = "\n".join(f"- {table_path}" 
-                                for idx, table_path in enumerate(inputs['tables']['image_route'], start=1))
-            final_result += table_str
-        else:
-            final_result = final_result.raw
+        
+        file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
+
+        final_result = final_result.raw + "\n\n[정보 출처] \n"
+        table_str = "\n".join(f"- {file}" 
+                            for idx, file in enumerate(file_names, start=1))
+        final_result += table_str
+        file_names = list(file_names)
+        file_names = list(map(lambda x: x+'./modules/datas/pdfs/', file_names))
+        self.test = file_names
         return final_result
 
 
