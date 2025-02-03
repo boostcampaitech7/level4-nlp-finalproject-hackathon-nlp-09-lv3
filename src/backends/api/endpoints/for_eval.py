@@ -1,12 +1,12 @@
 from modules.Pipeline import pipe_eval
 from fastapi import FastAPI
-from ...schemas import QueryRequest, QueryResponse
+from ...schemas import QueryRequest, QueryEvalResponse
 
 pipe = pipe_eval(verbose = False)
-pipe.setup(model = 'GPT')
+pipe.setup(model = 'Exaone')
 app = FastAPI()
 
-@app.post("/query", response_model=QueryResponse)
+@app.post("/query", response_model=QueryEvalResponse)
 async def query(request: QueryRequest):
 
     

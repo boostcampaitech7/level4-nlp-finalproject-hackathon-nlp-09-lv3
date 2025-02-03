@@ -6,7 +6,9 @@ class QueryRequest(BaseModel):
     query: str
 
 # 출력 모델
-class QueryResponse(BaseModel):
+class QueryEvalResponse(BaseModel):
     context: List[str]
     answer: str
 
+class QueryServiceResponse(BaseModel):
+    answer: str
