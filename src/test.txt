@@ -1,32 +1,26 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# 데이터 준비
-years = [2022, 2023, 2024, 2025, 2026]
-revenue = [1854, 1911, 2192, 2597, 2964]  # 매출액
-operating_income = [752, 768, 801, 1029, 1204]  # 영업이익
-net_income = [500, 595, 740, 840, 969]  # 순이익
+# 데이터 생성
+quarters = ['1Q24', '2Q24', '3Q24E', '4Q24E']
+revenue = [6659, 7070, 6686, 8359]
 
 # 데이터프레임 생성
-data = pd.DataFrame({'년도': years, '매출액': revenue, '영업이익': operating_income, '순이익': net_income})
-
-# 폰트 설정
-plt.rc('font', family='NanumGothic')
+data = pd.DataFrame({'Quarter': quarters, 'Revenue (십억 원)': revenue})
 
 # 그래프 생성
 plt.figure(figsize=(10, 6))
-plt.plot(data['년도'], data['매출액'], marker='o', label='매출액 (십억원)', color='blue')
-plt.plot(data['년도'], data['영업이익'], marker='o', label='영업이익 (십억원)', color='green')
-plt.plot(data['년도'], data['순이익'], marker='o', label='순이익 (십억원)', color='red')
+plt.bar(data['Quarter'], data['Revenue (십억 원)'], color='skyblue')
 
-# 제목 및 레이블 설정
-plt.title('크래프톤 주요 재무 지표 (2022-2026)')
-plt.xlabel('년도')
-plt.ylabel('금액 (십억원)')
-plt.xticks(years)
-plt.yticks()
-plt.legend()
+# 제목 및 레이블 추가
+plt.title('크래프톤 2024년 분기별 매출액', fontsize=16, fontfamily='NanumGothic')
+plt.xlabel('분기', fontsize=14, fontfamily='NanumGothic')
+plt.ylabel('매출액 (십억 원)', fontsize=14, fontfamily='NanumGothic')
+
+# y축 표시 형식 지정
+plt.xticks(rotation=45)
+plt.grid(axis='y')
 
 # 그래프 저장
-plt.savefig('output/Krafton_financials.png', bbox_inches='tight')
-plt.close()
+plt.savefig('output/krafton_2024_revenue.png')
+plt.show()

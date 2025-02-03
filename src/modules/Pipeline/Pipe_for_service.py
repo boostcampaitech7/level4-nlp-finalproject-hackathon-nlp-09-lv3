@@ -120,7 +120,7 @@ class Pipeline_For_Service:
         table = False
         inputs = {'query' : query, 'paragraphs': [],
                                     'images': {'image_route' : [], 'summary' : []},
-                                    'tables': {'table': [], 'summary' : []}, }
+                                    'tables': {'table': [], 'summary' : [], 'image_route': []}, }
         for i, doc in enumerate(retrieval_results):
             if doc.metadata['type'] == 'paragraph':
                 inputs['paragraphs'].append(doc.metadata['original_content'])
@@ -134,6 +134,7 @@ class Pipeline_For_Service:
             elif doc.metadata['type'] == 'table':
                 inputs['tables']['table'].append(doc.metadata['table'])
                 inputs['tables']['summary'].append(doc.page_content)
+                inputs['tables']['image_route'].append(doc.metadata['image_route'])
                 table = True
                 
             else:
@@ -164,8 +165,15 @@ class Pipeline_For_Service:
         final_result = self.final_crew.kickoff(inputs = {'context_result': context_result,
                                                         'table_result' : table_result,
                                                         'image_result' : image_result})
-            
-        return final_result.raw
+        if image:
+            final_result = final_result.raw + "\n\n제공받은 테이블 경로: \n"
+            # 리스트에 있는 테이블 경로들을 "1 : 경로1, 2 : 경로2, 3 : 경로3" 형태의 문자열로 생성
+            table_str = "\n".join(f"- {table_path}" 
+                                for idx, table_path in enumerate(inputs['tables']['image_route'], start=1))
+            final_result += table_str
+        else:
+            final_result = final_result.raw
+        return final_result
 
 
     def news_search_A(self, query):
