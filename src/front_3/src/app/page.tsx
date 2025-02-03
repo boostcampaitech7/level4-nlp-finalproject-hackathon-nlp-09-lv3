@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import ExampleList from "./_components/ExampleList";
-import SearchBar from "./_components/SearchBar";
-import ChatList from "./_components/ChatList";
-import Sidebar from "./_components/Sidebar";
-import type { QAndA } from "./_types/question";
-import ThemeToggle from "./_components/ThemeToggle";
+import ExampleList from "./components/ExampleList";
+import SearchBar from "./components/SearchBar";
+import ChatList from "./components/ChatList";
+import Sidebar from "./components/Sidebar";
+import type { QAndA } from "./types/question";
+import ThemeToggle from "./components/ThemeToggle";
 
 export default function Home() {
   const [questionList, setQuestionList] = useState<QAndA[]>([]);

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { QAndA } from "../_types/question";
+import type { QAndA } from "../types/question";
 
 interface ChatListProps {
   questionList: QAndA[];

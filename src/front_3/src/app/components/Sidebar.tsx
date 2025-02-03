@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dispatch, SetStateAction } from "react";
-import type { QAndA } from "../_types/question";
+import type { QAndA } from "../types/question";
 import Modal from "./Modal";
 import SavedGraphs from "./SavedGraphs";
 

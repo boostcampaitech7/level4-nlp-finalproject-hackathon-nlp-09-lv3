@@ -53,7 +53,18 @@
 
 const SearchBar = ({ handleSubmit }: { handleSubmit: (formData: FormData) => void }) => {
   return (
-    <form className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[80%] max-w-3xl" action={handleSubmit}>
+    <form 
+      className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[80%] max-w-3xl" 
+      action={handleSubmit}
+      onSubmit={(e) => {
+        const textarea = e.currentTarget.querySelector('textarea');
+        if (textarea) {
+          setTimeout(() => {
+            textarea.style.height = 'auto';
+          }, 0);
+        }
+      }}
+    >
       <div className="relative bg-white p-4 rounded-xl shadow-lg">
         <textarea
           id="search"
@@ -64,6 +75,12 @@ const SearchBar = ({ handleSubmit }: { handleSubmit: (formData: FormData) => voi
           onInput={(e) => {
             e.currentTarget.style.height = "auto";
             e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              e.currentTarget.form?.requestSubmit();
+            }
           }}
           required
         />
