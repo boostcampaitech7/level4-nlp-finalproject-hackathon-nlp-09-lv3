@@ -20,7 +20,6 @@ app = FastAPI()
 # CORS 설정 추가
 origins = [
     "http://localhost:3000",  # 프론트엔드 도메인 (React 앱)
-    "https://yourfrontenddomain.com",  # 필요한 다른 도메인 추가
 ]
 
 app.add_middleware(
