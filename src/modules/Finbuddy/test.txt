@@ -1,0 +1,40 @@
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Set the font to 'NanumGothic'
+plt.rcParams['font.family'] = 'NanumGothic'
+
+# Data
+categories = ['매출액', '온라인', '모바일', '콘솔']
+years = ['2024E', '2025E', '2026E']
+
+# Values extracted from the table
+values_2024 = [2615.7, 888.8, 1711.2, 37.9]
+values_2025 = [2909.2, 1083.4, 1756.2, 35.2]
+values_2026 = [3518.7, 1457.8, 1870.6, 152.3]
+
+# Create subplots
+fig, ax = plt.subplots()
+
+index = np.arange(len(categories))
+bar_width = 0.2
+
+# Plot
+bars1 = ax.bar(index, values_2024, bar_width, label='2024 예상')
+bars2 = ax.bar(index + bar_width, values_2025, bar_width, label='2025 예상')
+bars3 = ax.bar(index + 2 * bar_width, values_2026, bar_width, label='2026 예상')
+
+# Labels and Titles
+ax.set_xlabel('구분')
+ax.set_ylabel('금액 (십억원)')
+ax.set_title('크래프톤의 연도별 사업 부문 매출 변화')
+ax.set_xticks(index + bar_width)
+ax.set_xticklabels(categories)
+ax.legend()
+
+# Save the plot
+plt.tight_layout()
+plt.savefig('output/krafton_key_businesses.png')
+plt.show()
+  

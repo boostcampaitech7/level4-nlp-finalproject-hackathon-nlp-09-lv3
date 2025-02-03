@@ -1,0 +1,10 @@
+context_analysis_task:
+  description: >
+    제공된 Context 데이터를 분석하여 유용한 정보를 정리하세요.
+    분석 결과는 사용자에게 바로 전달할 수 있을 만큼 명확해야 합니다.
+    사용자의 질문과 관계가 없는 Context 데이터는 무시합니다.
+    질문 : {query}
+    제공된 context : {paragraphs}
+  expected_output: >
+    사용자의 질문에 가장 도움이 되는 context에 대한 정보
+  agent: context_analyzer
