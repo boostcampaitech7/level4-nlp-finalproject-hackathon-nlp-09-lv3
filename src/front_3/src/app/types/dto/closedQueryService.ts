@@ -1,8 +1,8 @@
-interface ClosedQueryRequest {
+export interface ClosedQueryRequest {
   query: string;
 }
 
-interface ClosedQueryResponse {
+export interface ClosedQueryResponse {
   context: string[];
   answer: string;
 }
