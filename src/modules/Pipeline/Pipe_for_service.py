@@ -176,6 +176,7 @@ class Pipeline_For_Service:
         final_result += table_str
         file_names = list(file_names)
         file_names = list(map(lambda x: './modules/datas/pdfs/' + x, file_names))
+
         self.test = file_names
         return final_result
 
