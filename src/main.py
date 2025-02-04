@@ -22,6 +22,7 @@ origins = [
     "http://localhost:3001",  # 프론트엔드 도메인 (React 앱)
     "http://localhost:3000",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # 허용할 도메인 목록
