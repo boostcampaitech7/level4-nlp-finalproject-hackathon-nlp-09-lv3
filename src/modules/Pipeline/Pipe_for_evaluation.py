@@ -126,6 +126,7 @@ class Pipeline_For_Eval:
             retrieval_results = self.Q(query, mode = mode)
             G_retrieval_score = G_retrieval_evaluate(query, retrieval_results)
             generated_answer = self.A(query, retrieval_results)
+
             G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)
             if self.verbose:
                 print('[query]:', query)
@@ -143,6 +144,7 @@ class Pipeline_For_Eval:
             self.verbose = False
             generation_scores = []
             retrieval_scores = []
+            generated_answers = []
             
             for idx, row in tqdm(eval_dataset.iterrows()):
                 query = row['question']
@@ -153,12 +155,14 @@ class Pipeline_For_Eval:
                 retrieval_scores.append(G_retrieval_score)
 
                 generated_answer = self.A(query, retrieval_results)
+                generated_answers.append(generated_answer)
                 G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)    
                 generation_scores.append(G_generation_score)
 
             
             eval_dataset['retrieval_score'] = retrieval_scores
             eval_dataset['generation_score'] = generation_scores
+            eval_dataset['generated_answer'] = generated_answers
 
             print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
             eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt2.csv')
