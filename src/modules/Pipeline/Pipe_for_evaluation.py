@@ -13,7 +13,7 @@ class Pipeline_For_Eval:
                  collection_name = 'chrdb.db',
                  persist_directory = 'modules/DB',
                  mode = 'NaverCloudEmb',
-                 topk = 5,
+                 topk = 3,
                  verbose = False):
         self.verbose = verbose
         self.collection_name = collection_name
@@ -89,18 +89,22 @@ class Pipeline_For_Eval:
         return result[:self.topk]
     
     def A(self, query, retrieval_results):
-        
-
-        retrieval_results = [doc.metadata['original_content'] for doc in retrieval_results]
+        retrieval_contents = [doc.metadata['original_content'] for doc in retrieval_results]
+        file_names = [doc.metadata['file_name'] for doc in retrieval_results]
         documents = "\n".join(
-        [f"참고 문서{idx + 1}: {doc.strip()}" for idx, doc in enumerate(retrieval_results)])
+        [f"{file_names[idx]}: {retrieval_contents[idx].strip()}" for idx in range(len(retrieval_contents))]
+        )
         prompt = f"""
-다음 참고 문서를 반드시 활용하여 질문에 대한 정확하고 간결한 답변을 작성하세요. 
-답변은 반드시 질문과 관련된 사실에 기반하며, 불필요한 반복이나 모호함 없이 핵심 내용을 포함해야 합니다. 
-200자를 초과하지 않도록 작성하세요.
+다음 참고 문서를 반드시 활용하여 질문에 대한 명확하고 신뢰할 수 있는 답변을 작성하세요.
+
+답변은 500자 이내로 작성하세요.
+질문과 직접적으로 관련된 정보를 제공하세요.
+사실적으로 정확한 정보만 포함하세요.
+질문에 적절한 세부 정보를 포함하되, 명확하고 간결하게 작성하세요.
+출처를 반드시 명시하세요.
 
 질문: {query.strip()}
-{documents}"
+참고 문서: {documents}"
 정답:"""
         if self.verbose:
             print(prompt)
@@ -132,6 +136,8 @@ class Pipeline_For_Eval:
                 print('[query]:', query)
                 print('----------'*10)
                 print('----------'*10)
+                print('[retrieval_results]:', retrieval_results)
+                print('----------'*10)
                 print('[answer]:', generated_answer)
                 print('----------'*10)
                 print('[Retrieval score]')
@@ -159,11 +165,11 @@ class Pipeline_For_Eval:
                 G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)    
                 generation_scores.append(G_generation_score)
 
-            
+            eval_dataset['retrieval_results'] = retrieval_results
+            eval_dataset['generated_answer'] = generated_answers
             eval_dataset['retrieval_score'] = retrieval_scores
             eval_dataset['generation_score'] = generation_scores
-            eval_dataset['generated_answer'] = generated_answers
-
+            
             print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
-            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt2.csv')
+            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt4.csv')
             return eval_dataset

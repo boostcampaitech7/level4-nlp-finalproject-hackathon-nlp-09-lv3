@@ -2,12 +2,13 @@ from DB.chromadb_storing import ChromaDB
 from utils import get_all_datas, create_documents
 import os
 from retrievals import bm25, dpr, ensemble
-from tqdm import tqdm
+import shutil
 import json
 import subprocess
 import tempfile
 import unicodedata
 from Finbuddy import crews
+from QA_model import GPT_Router
 
 
 def execute_code(code_str: str, ):
@@ -91,10 +92,16 @@ class Pipeline_For_Service:
                 for agent in crew.agents:
                     agent.verbose = False
                     
-        output_dir = "output"
+        output_dir = "./output"
         # 폴더가 없으면 생성
         os.makedirs(output_dir, exist_ok=True)
 
+    def reset_output(self):
+        output_dir = "./output"
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+
+        os.makedirs(output_dir, exist_ok=True)
 
     def Q(self, query: str, mode = 'ensemble'):
         if mode == 'ensemble':
@@ -125,18 +132,18 @@ class Pipeline_For_Service:
         for i, doc in enumerate(retrieval_results):
             if doc.metadata['type'] == 'paragraph':
                 inputs['paragraphs']['paragraph'].append(doc.metadata['original_content'])
-                inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFC",(doc.metadata['file_name'])))
+                inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFD",(doc.metadata['file_name'])))
                 paragraph = True
 
             elif doc.metadata['type'] == 'figure':
-                inputs['images']['file_name'].append(unicodedata.normalize("NFC", doc.metadata['file_name']))
+                inputs['images']['file_name'].append(unicodedata.normalize("NFD", doc.metadata['file_name']))
                 inputs['images']['summary'].append(doc.page_content)
                 image = True
 
             elif doc.metadata['type'] == 'table':
                 inputs['tables']['table'].append(doc.metadata['table'])
                 inputs['tables']['summary'].append(doc.page_content)
-                inputs['tables']['file_name'].append(unicodedata.normalize("NFC",doc.metadata['file_name']))
+                inputs['tables']['file_name'].append(unicodedata.normalize("NFD",doc.metadata['file_name']))
                 table = True
                 
             else:
@@ -175,9 +182,14 @@ class Pipeline_For_Service:
                             for idx, file in enumerate(file_names, start=1))
         final_result += table_str
         file_names = list(file_names)
-        file_names = list(map(lambda x: './modules/datas/pdfs/' + x, file_names))
-
+        file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
         self.test = file_names
+        output_dir = "./output"
+        for file in file_names:
+            if os.path.exists(file):  # 파일이 존재하는지 확인
+                shutil.copy(file, output_dir)  # 파일 복사
+            else:
+                pass
         return final_result
 
 
@@ -186,14 +198,27 @@ class Pipeline_For_Service:
         answer = self.news_crew.kickoff(inputs = inputs)
         return answer.raw
     
-    def QA(self, query:str, mode = 'ensemble', search_type = 'closed_domain'):
+    def QA(self, query:str, mode = 'ensemble', search_type = None):
+        router = GPT_Router()
+        response = router.answering(query)
+        tool = response.tool
+        query_or_answer = response.final_answer
         if search_type == 'closed_domain':
-            A = self.A
-            retrieval_results = self.Q(query, mode = mode)
-            answer = A(query, retrieval_results,)
+            retrieval_results = self.Q(query_or_answer, mode = mode)
+            answer = self.A(query, retrieval_results,)
         elif search_type == 'open_domain':
-            A = self.news_search_A
-            answer = A(query)
+            answer = self.news_search_A(query_or_answer)
+        else:
+            if response.tool == '최신 뉴스기사 검색':
+                answer = self.news_search_A(query_or_answer)
+
+            if tool == '내부 주식 리포트 RAG':
+                retrieval_results = self.Q(query, mode = mode)
+                answer = self.A(query, retrieval_results,)
+            
+            if tool == '직접 답변':
+                answer = query_or_answer
+
         return answer
 
 

@@ -10,7 +10,7 @@ code_generate_task:
     테이블에 대한 설명: {tables[summary]}
   expected_output: >
     주어진 테이블을 통해 제작된 시각화 코드
-    저장되는 full file path를 반드시 명시
+    저장되는 파일 이름을 반드시 명시
     만약 사용자의 질문과 관계 없는 테이블이라면 아무것도 출력하지 않음
   agent: code_generator
 
@@ -25,7 +25,7 @@ code_analyze_task:
     테이블에 대한 설명: {tables[summary]}
   expected_output: >
     실행하는 데에 문제가 없는 완전한 형태의 코드
-    저장된 파일의 full file path
+    저장된 파일의 이름
   agent: code_analyzer
   context: [code_generate_task]
 
