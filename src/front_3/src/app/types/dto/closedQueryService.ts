@@ -3,6 +3,6 @@ export interface ClosedQueryRequest {
 }
 
 export interface ClosedQueryResponse {
-  context: string[];
+  //context: string[];
   answer: string;
 }

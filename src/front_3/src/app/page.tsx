@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, Dispatch, SetStateAction } from "react";
+import { useState, useRef, Dispatch, SetStateAction,useEffect } from "react";
 import { useMutateQueryApi } from "./store/useClosedQueryApi";// API 훅 임포트
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ExampleList from "./components/ExampleList";
@@ -11,6 +11,7 @@ import type { QAndA } from "./types/question";
 import ThemeToggle from "./components/ThemeToggle";
 import ChatHistoryMenu from './components/ChatHistoryMenu';
 import type { ChatHistory } from './types/chatHistory';
+import { parseApiResponse } from './api/parsers/chatParser';
 
 interface HomeContentProps {
   questionList: QAndA[];
@@ -53,6 +54,8 @@ function HomeContent({
   const mutation = useMutateQueryApi();
   const abortControllerRef = useRef<AbortController | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+
+
   
   // 새로운 대화 시작 시 현재 대화 저장
   const saveCurrentChat = () => {
@@ -158,40 +161,66 @@ function HomeContent({
     abortControllerRef.current = new AbortController();
 
     try {
-      mutation.mutate(
-        { query: submittedQuestion },
-        {
-          onSuccess: (data) => {
-            const updatedList = [...questionList, { ...newQuestion, answer: data.answer, context: data.context }];
-            setQuestionList(updatedList);
+          // 테스트 코드. api 연동하면서 테스트하면 지워야하는 부분
+    const testExample = `이것은 컨텍스트 내용입니다. 챗봇이 생성한 답변 내용이 여기 들어갑니다.
+
+    [생성된 이미지 이름]
+    SK_Hynix_Financial_Projection.png
+    naver_revenue_2024.png
+    naver_forecast_2025.png
+    
+    [정보 출처]
+    네이버부스트캠프_기업_해커톤_정량평가(G-Eval)_안내문.pdf`;
+    
+        const testResponse = {
+          answer: testExample,
+          context: ''
+        };
+    
+        const result = parseApiResponse(testResponse, "테스트 질문");
+        console.log('=== 파서 테스트 결과 ===');
+        console.log(result);
+      
+    
+        // 바로 테스트 데이터로 상태 업데이트
+  const parsedData = parseApiResponse(testResponse, submittedQuestion);
+  setQuestionList(prev => [...prev.slice(0, -1), parsedData]);
+  setShowExampleList(false);
+      // mutation.mutate(
+      //   { query: submittedQuestion },
+      //   {
+      //     onSuccess: (data) => {
+      //       //const parsedData = parseApiResponse(data, submittedQuestion);
+      //       const updatedList = [...questionList, { ...newQuestion, answer: data.answer, context: data.context }];
+      //       setQuestionList(updatedList);
             
-            if (currentChatId) {
-              updateCurrentChat(updatedList);
-            } else if (newId) {  // newId가 존재할 때만 실행
-              setHistories(prev => prev.map(history => 
-                history.id === newId
-                  ? { ...history, messages: updatedList }
-                  : history
-              ));
-            }
-          },
-          onError: (error) => {
-            console.error("API 요청 실패:", error);
-            const updatedList = [...questionList, { ...newQuestion, error: true }];
-            setQuestionList(updatedList);
+      //       if (currentChatId) {
+      //         updateCurrentChat(updatedList);
+      //       } else if (newId) {  // newId가 존재할 때만 실행
+      //         setHistories(prev => prev.map(history => 
+      //           history.id === newId
+      //             ? { ...history, messages: updatedList }
+      //             : history
+      //         ));
+      //       }
+      //     },
+      //     onError: (error) => {
+      //       console.error("API 요청 실패:", error);
+      //       const updatedList = [...questionList, { ...newQuestion, error: true }];
+      //       setQuestionList(updatedList);
             
-            if (currentChatId) {
-              updateCurrentChat(updatedList);
-            } else if (newId) {  // newId가 존재할 때만 실행
-              setHistories(prev => prev.map(history =>
-                history.id === newId
-                  ? { ...history, messages: updatedList }
-                  : history
-              ));
-            }
-          },
-        }
-      );
+      //       if (currentChatId) {
+      //         updateCurrentChat(updatedList);
+      //       } else if (newId) {  // newId가 존재할 때만 실행
+      //         setHistories(prev => prev.map(history =>
+      //           history.id === newId
+      //             ? { ...history, messages: updatedList }
+      //             : history
+      //         ));
+      //       }
+      //     },
+      //   }
+      // );
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
         console.log('Request aborted');

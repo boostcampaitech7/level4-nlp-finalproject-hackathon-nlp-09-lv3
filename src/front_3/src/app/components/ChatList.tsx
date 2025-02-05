@@ -16,7 +16,7 @@ const ChatList = ({ questionList, onRetry }: ChatListProps) => {
   return (
     <div className="flex-1 w-full max-w-3xl mx-auto overflow-y-auto px-4 pb-40 mt-8">
       <div className="space-y-6">
-        {questionList.map(({ question, answer, error }, index) => (
+        {questionList.map(({ question, answer, error, imageNames, fileNames }, index) => (
           <div key={index} className="flex flex-col space-y-4">
             {/* 사용자 질문 */}
             <div className="flex justify-end">
@@ -59,7 +59,36 @@ const ChatList = ({ questionList, onRetry }: ChatListProps) => {
                     </button>
                   </div>
                 ) : answer ? (
-                  answer
+                  <>
+                    {answer}
+                    {imageNames && imageNames.length > 0 && (
+                      <div className="image-container mt-2">
+                        {imageNames.map((imgUrl, index) => (
+                          <img 
+                            key={index}
+                            src={imgUrl}
+                            alt={`${imageNames} ${index + 1}`}
+                            className="max-w-xs rounded-lg shadow-md m-2"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {fileNames && fileNames.length > 0 && (
+                      <div className="file-links mt-2">
+                        <p className="text-sm text-gray-600">참고 문서:</p>
+                        {fileNames.map((fileUrl, index) => (
+                          <a
+                            key={index}
+                            href={fileUrl}
+                            download
+                            className="block text-blue-500 hover:underline mt-1"
+                          >
+                            {fileUrl.split('/').pop()}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
