@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, Dispatch, SetStateAction } from "react";
 import { useMutateQueryApi } from "./store/useClosedQueryApi";// API 훅 임포트
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ExampleList from "./components/ExampleList";
@@ -9,12 +9,23 @@ import ChatList from "./components/ChatList";
 import Sidebar from "./components/Sidebar";
 import type { QAndA } from "./types/question";
 import ThemeToggle from "./components/ThemeToggle";
+import ChatHistoryMenu from './components/ChatHistoryMenu';
+import type { ChatHistory } from './types/chatHistory';
 
+interface HomeContentProps {
+  questionList: QAndA[];
+  setQuestionList: Dispatch<SetStateAction<QAndA[]>>;
+  showExampleList: boolean;
+  setShowExampleList: Dispatch<SetStateAction<boolean>>;
+  histories: ChatHistory[];
+  setHistories: Dispatch<SetStateAction<ChatHistory[]>>;
+}
 
 export default function Home() {
   const queryClient = new QueryClient();// QueryClient 생성
   const [questionList, setQuestionList] = useState<QAndA[]>([]);
   const [showExampleList, setShowExampleList] = useState(true); 
+  const [histories, setHistories] = useState<ChatHistory[]>([]);
   return (
     <QueryClientProvider client={queryClient}> 
       <HomeContent 
@@ -22,67 +33,190 @@ export default function Home() {
         setQuestionList={setQuestionList}
         showExampleList={showExampleList}
         setShowExampleList={setShowExampleList}
+        histories={histories}
+        setHistories={setHistories}
       />
     </QueryClientProvider>
   );
 }
 
-function HomeContent({ questionList, setQuestionList, showExampleList, setShowExampleList }) {
-  // useMutateQueryApi 훅을 사용해 mutation 객체 가져오기
+function HomeContent({ 
+  questionList, 
+  setQuestionList, 
+  showExampleList, 
+  setShowExampleList,
+  histories,
+  setHistories
+}: HomeContentProps) {
+  const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
+  const [domain, setDomain] = useState<'open' | 'close'>('close');
   const mutation = useMutateQueryApi();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  
+  // 새로운 대화 시작 시 현재 대화 저장
+  const saveCurrentChat = () => {
+    if (questionList.length > 0) {
+      // 현재 대화가 이미 저장되어 있는지 확인
+      const isAlreadySaved = histories.some(history => 
+        history.messages.length === questionList.length && 
+        history.messages[0].question === questionList[0].question &&
+        history.messages[history.messages.length - 1].question === 
+        questionList[questionList.length - 1].question
+      );
 
-  //응답받는 로직
+      if (!isAlreadySaved) {
+        const newHistory: ChatHistory = {
+          id: Date.now().toString(),
+          title: questionList[0].question,
+          messages: [...questionList],
+          createdAt: new Date(),
+        };
+        setHistories(prev => [newHistory, ...prev]);
+      }
+    }
+  };
+
+  // 새로운 대화 시작
+  const handleNewChat = () => {
+    if (currentChatId) {
+      saveCurrentChat();
+    }
+    setCurrentChatId(null);
+    setQuestionList([]);
+    setShowExampleList(true);
+  };
+
+  // 저장된 대화 선택
+  const handleSelectHistory = (history: ChatHistory) => {
+    if (currentChatId && currentChatId !== history.id) {
+      saveCurrentChat();
+    }
+    setCurrentChatId(history.id);
+    setQuestionList(history.messages);
+    setShowExampleList(false);
+  };
+
+  // 대화 내용이 업데이트될 때마다 histories 업데이트
+  const updateCurrentChat = (newQuestionList: QAndA[]) => {
+    if (currentChatId) {
+      setHistories(prev => prev.map(history => 
+        history.id === currentChatId
+          ? {
+              ...history,
+              messages: newQuestionList,
+              // 마지막 메시지가 변경된 경우에만 title 업데이트
+              title: history.messages[0].question
+            }
+          : history
+      ));
+    }
+  };
+
   const handleSubmit = async (formData: FormData) => {
     const submittedQuestion = formData.get("search") as string;
     
     if (!submittedQuestion?.trim()) return;
 
-    const questionLists = questionList.concat({
+    // 먼저 새 질문을 목록에 추가
+    const newQuestion = {
       question: submittedQuestion,
       answer: null,
-    });
+    };
 
-    setQuestionList(questionLists);
+    let newId: string | null = null;  // newId를 함수 스코프로 이동
+
+    // 새로운 대화인 경우
+    if (!currentChatId) {
+      newId = Date.now().toString();  // newId 할당
+      setCurrentChatId(newId);
+      // histories에 새 대화 추가
+      const newHistory: ChatHistory = {
+        id: newId,
+        title: submittedQuestion,
+        messages: [newQuestion],
+        createdAt: new Date(),
+      };
+      setHistories(prev => [newHistory, ...prev]);
+      // questionList 업데이트
+      setQuestionList([newQuestion]);
+    } else {
+      // 기존 대화 업데이트
+      const updatedQuestionList = [...questionList, newQuestion];
+      setQuestionList(updatedQuestionList);
+      updateCurrentChat(updatedQuestionList);
+    }
+    
     setShowExampleList(false);
 
-    try {
-      // API 호출 및 답변 처리 로직
-      // 임시로 에러를 발생시켜 테스트
-      // const random = Math.random();
-      // if (random < 0.5) throw new Error("API Error");
+    // 이전 요청이 있다면 중단
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-      // API 요청을 mutation.mutate로 처리
+    // 새로운 AbortController 생성
+    abortControllerRef.current = new AbortController();
+
+    try {
       mutation.mutate(
         { query: submittedQuestion },
         {
           onSuccess: (data) => {
-          // API 요청 성공 시 응답 데이터 처리
-            setQuestionList(prev => 
-            prev.map((qa, i) => 
-              i === prev.length - 1 
-                ? { ...qa, answer: data.answer, context: data.context }
-                : qa
-          )
-        );
-      }, 
+            const updatedList = [...questionList, { ...newQuestion, answer: data.answer, context: data.context }];
+            setQuestionList(updatedList);
+            
+            if (currentChatId) {
+              updateCurrentChat(updatedList);
+            } else if (newId) {  // newId가 존재할 때만 실행
+              setHistories(prev => prev.map(history => 
+                history.id === newId
+                  ? { ...history, messages: updatedList }
+                  : history
+              ));
+            }
+          },
           onError: (error) => {
-            // API 요청 실패 시 처리
-            setQuestionList(prev => 
-              prev.map((qa, i) => 
-                i === prev.length - 1 ? { ...qa, error: true }: qa
-              )
-            );
             console.error("API 요청 실패:", error);
+            const updatedList = [...questionList, { ...newQuestion, error: true }];
+            setQuestionList(updatedList);
+            
+            if (currentChatId) {
+              updateCurrentChat(updatedList);
+            } else if (newId) {  // newId가 존재할 때만 실행
+              setHistories(prev => prev.map(history =>
+                history.id === newId
+                  ? { ...history, messages: updatedList }
+                  : history
+              ));
+            }
           },
         }
       );
     } catch (error) {
-      // 에러 처리
-      setQuestionList(prev =>
-        prev.map((qa, i) =>
-          i === prev.length - 1 ? { ...qa, error: true } : qa
-        )
-      );
+      if ((error as Error).name === 'AbortError') {
+        console.log('Request aborted');
+      } else {
+        console.error('Error:', error);
+        const updatedList = [...questionList, { ...newQuestion, error: true }];
+        setQuestionList(updatedList);
+        
+        if (currentChatId) {
+          updateCurrentChat(updatedList);
+        } else if (newId) {  // newId가 존재할 때만 실행
+          setHistories(prev => prev.map(history =>
+            history.id === newId
+              ? { ...history, messages: updatedList }
+              : history
+          ));
+        }
+      }
+    }
+  };
+
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
   };
 
@@ -126,9 +260,25 @@ function HomeContent({ questionList, setQuestionList, showExampleList, setShowEx
     // }
   };
 
+  // 대화 삭제 핸들러
+  const handleDeleteHistory = (id: string) => {
+    setHistories(prev => prev.filter(history => history.id !== id));
+    if (currentChatId === id) {
+      setCurrentChatId(null);
+      setQuestionList([]);
+      setShowExampleList(true);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[var(--background)]">
       <ThemeToggle />
+      <ChatHistoryMenu
+        histories={histories}
+        onSelectHistory={handleSelectHistory}
+        onDeleteHistory={handleDeleteHistory}
+        onNewChat={handleNewChat}
+      />
       {showExampleList && (
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* 로고 섹션 */}
@@ -146,9 +296,8 @@ function HomeContent({ questionList, setQuestionList, showExampleList, setShowEx
           {/* 예시 목록 섹션 */}
           <div className="w-full max-w-4xl mx-auto px-4">
             <ExampleList 
-              questionList={questionList} 
-              setQuestionList={setQuestionList}
               setShowExampleList={setShowExampleList}
+              searchBarRef={searchBarRef}
             />
           </div>
         </div>
@@ -164,14 +313,21 @@ function HomeContent({ questionList, setQuestionList, showExampleList, setShowEx
 
       {/* Sidebar */}
       <Sidebar 
-        setQuestionList={setQuestionList}
+        setQuestionList={handleNewChat}
         setShowExampleList={setShowExampleList}
         showExampleList={showExampleList}
       />
 
       {/* SearchBar */}
       <div className="w-full max-w-4xl mx-auto px-4">
-        <SearchBar handleSubmit={handleSubmit} />
+        <SearchBar 
+          ref={searchBarRef} 
+          handleSubmit={handleSubmit}
+          domain={domain}
+          setDomain={setDomain}
+          isLoading={mutation.isPending}
+          onAbort={handleAbort}
+        />
       </div>
     </div>
 

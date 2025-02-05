@@ -11,22 +11,7 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ setQuestionList, setShowExampleList, showExampleList }: SidebarProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false);
-
-  const handleNewChat = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmNewChat = () => {
-    setQuestionList([]);
-    setShowExampleList(true);
-    setIsModalOpen(false);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
 
   const toggleGraphs = () => {
     setShowGraphs(!showGraphs);
@@ -59,27 +44,6 @@ const Sidebar = ({ setQuestionList, setShowExampleList, showExampleList }: Sideb
           </svg>
           <span>저장된 그래프</span>
         </button>
-
-        <button
-          onClick={handleNewChat}
-          className="flex items-center space-x-2 text-white bg-[#2C2C2C] px-4 py-2 rounded-lg hover:bg-[#3C3C3C] transition"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
-          <span>새로운 대화</span>
-        </button>
       </div>
 
       {showGraphs && (
@@ -87,12 +51,6 @@ const Sidebar = ({ setQuestionList, setShowExampleList, showExampleList }: Sideb
           <SavedGraphs onClose={() => setShowGraphs(false)} />
         </div>
       )}
-
-      <Modal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirmNewChat}
-      />
     </>
   );
 };

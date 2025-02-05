@@ -58,23 +58,16 @@ import type { QAndA } from "../types/question";
 
 const Example = ({
   text,
-  questionList,
-  setQuestionList,
   setShowExampleList,
+  searchBarRef
 }: {
   text: string;
-  questionList: QAndA[];
-  setQuestionList: Dispatch<SetStateAction<QAndA[]>>;
   setShowExampleList: Dispatch<SetStateAction<boolean>>;
+  searchBarRef: any;
 }) => {
   const handleClick = () => {
-    const newList = questionList.concat([{ 
-      question: text, 
-      answer: "답변이에용~~ api 호출해서 진짜 답변으로 바꿔야해요!" 
-    }]);
-    
-    setQuestionList(newList);
-    setShowExampleList(false); // 예시 목록 숨기기
+    searchBarRef.current?.setText(text);
+    setShowExampleList(false);
   };
 
   return (
@@ -88,13 +81,11 @@ const Example = ({
 };
 
 export default function ExampleList({
-  questionList,
-  setQuestionList,
   setShowExampleList,
+  searchBarRef
 }: {
-  questionList: QAndA[];
-  setQuestionList: Dispatch<SetStateAction<QAndA[]>>;
   setShowExampleList: Dispatch<SetStateAction<boolean>>;
+  searchBarRef: any;
 }) {
   const exampleList = [
     "네이버의 2025년 전망은 어때?",
@@ -109,9 +100,8 @@ export default function ExampleList({
         <Example 
           key={index} 
           text={text} 
-          questionList={questionList} 
-          setQuestionList={setQuestionList}
           setShowExampleList={setShowExampleList}
+          searchBarRef={searchBarRef}
         />
       ))}
     </div>
