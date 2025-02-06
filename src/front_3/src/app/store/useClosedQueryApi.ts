@@ -12,9 +12,31 @@ export const useClosedQueryApi = (query: string) => {
   });
 };
 
+interface ChatApiRequest {
+  query: string;
+}
+
+interface ChatApiResponse {
+  answer: string;
+  context?: string;
+}
+
+const mockChatApi = async (request: ChatApiRequest): Promise<ChatApiResponse> => {
+  // 실제 API 호출 대신 지연을 주어 응답을 모사
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  return {
+    answer: `이것은 "${request.query}"에 대한 테스트 응답입니다.`,
+    context: "테스트 문서"
+  };
+};
+
 // 뮤테이션 요청을 처리하는 hook
 export const useMutateQueryApi = () => {
-  return useMutation<ClosedQueryResponse, Error, ClosedQueryRequest>({
-    mutationFn: chatApi, // API 요청 함수
+  return useMutation({
+    mutationFn: mockChatApi,
+    onError: (error) => {
+      console.error('Mutation 에러:', error);
+    },
   });
 };

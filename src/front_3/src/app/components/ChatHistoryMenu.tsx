@@ -15,6 +15,7 @@ export default function ChatHistoryMenu({
   onNewChat 
 }: ChatHistoryMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chat' | 'images'>('chat');
 
   return (
     <div className="fixed top-4 left-4 z-50">
@@ -45,7 +46,7 @@ export default function ChatHistoryMenu({
       }`}>
         <div className="p-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">대화 기록</h2>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">메뉴</h2>
             <button
               onClick={() => setIsOpen(false)}
               className="p-1 rounded-lg hover:bg-gray-700/50 transition-colors"
@@ -66,71 +67,106 @@ export default function ChatHistoryMenu({
             </button>
           </div>
 
-          <button
-            onClick={() => {
-              onNewChat();
-              setIsOpen(false);
-            }}
-            className="w-full mb-4 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--background)] rounded-lg hover:bg-gray-700/50 transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {/* 탭 버튼 */}
+          <div className="flex mb-4 border-b border-gray-700">
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`flex-1 py-2 text-sm font-medium ${
+                activeTab === 'chat'
+                  ? 'text-blue-500 border-b-2 border-blue-500'
+                  : 'text-[var(--foreground)]'
+              }`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            새로운 대화
-          </button>
+              대화내역
+            </button>
+            <button
+              onClick={() => setActiveTab('images')}
+              className={`flex-1 py-2 text-sm font-medium ${
+                activeTab === 'images'
+                  ? 'text-blue-500 border-b-2 border-blue-500'
+                  : 'text-[var(--foreground)]'
+              }`}
+            >
+              저장된 이미지
+            </button>
+          </div>
 
-          <div className="space-y-2">
-            {histories.map((history) => (
-              <div
-                key={history.id}
-                className="p-3 rounded-lg bg-[var(--background)] hover:bg-gray-700/50 cursor-pointer transition-colors"
+          {activeTab === 'chat' ? (
+            <>
+              {/* 새로운 대화 버튼 */}
+              <button
                 onClick={() => {
-                  onSelectHistory(history);
+                  onNewChat();
                   setIsOpen(false);
                 }}
+                className="w-full mb-4 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--background)] rounded-lg hover:bg-gray-700/50 transition-colors"
               >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-[var(--foreground)] truncate">
-                    {history.title}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteHistory(history.id);
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                새로운 대화
+              </button>
+
+              {/* 대화 내역 목록 */}
+              <div className="space-y-2">
+                {histories.map((history) => (
+                  <div
+                    key={history.id}
+                    className="p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer"
+                    onClick={() => {
+                      onSelectHistory(history);
+                      setIsOpen(false);
                     }}
-                    className="p-1 rounded-full hover:bg-gray-600/50"
                   >
-                    <svg
-                      className="w-4 h-4 text-[var(--foreground)]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <span className="text-xs text-gray-400">
-                  {new Date(history.createdAt).toLocaleDateString()}
-                </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[var(--foreground)] truncate">
+                        {history.title}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteHistory(history.id);
+                        }}
+                        className="p-1 rounded-full hover:bg-gray-600/50"
+                      >
+                        <svg
+                          className="w-4 h-4 text-[var(--foreground)]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <span className="text-xs text-gray-400">
+                      {new Date(history.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            // 저장된 이미지 탭 내용
+            <div className="text-center text-[var(--foreground)] py-4">
+              저장된 이미지가 없습니다.
+            </div>
+          )}
         </div>
       </div>
     </div>

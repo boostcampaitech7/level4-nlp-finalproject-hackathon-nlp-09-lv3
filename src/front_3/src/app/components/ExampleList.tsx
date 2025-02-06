@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Dispatch, SetStateAction } from "react";
 import type { QAndA } from "../types/question";
 
@@ -56,56 +57,43 @@ import type { QAndA } from "../types/question";
 //   );
 // }
 
-const Example = ({
-  text,
-  setShowExampleList,
-  searchBarRef
-}: {
-  text: string;
-  setShowExampleList: Dispatch<SetStateAction<boolean>>;
-  searchBarRef: any;
-}) => {
-  const handleClick = () => {
-    searchBarRef.current?.setText(text);
-    setShowExampleList(false);
-  };
+interface ExampleListProps {
+  onExampleClick: (example: string) => void;
+}
+
+const ExampleList: React.FC<ExampleListProps> = ({ onExampleClick }) => {
+  const examples = [
+    "네이버의 2025년 전망은 어때?",
+    "랩큐의 2025년 사업 계획을 알려줘",
+    "카카오의 2024년 2분기 수익률을 알려줘.",
+    "한화가 새로 시작한 사업이 있어?"
+  ];
 
   return (
-    <div
-      className="bg-[var(--example-box)] w-full h-20 flex items-center justify-center text-[var(--foreground)] p-4 rounded-lg cursor-pointer hover:bg-[var(--example-box-hover)] transition text-center"
-      onClick={handleClick}
-    >
-      {text}
+    <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="mb-12 text-center">
+        <h1 className="text-4xl font-bold mb-4 text-[var(--foreground)]">FinBuddy</h1>
+        <img 
+          src="https://img.icons8.com/pastel-glyph/64/1A1919/dog-jump--v1.png"
+          alt="FinBuddy Logo"
+          className="w-16 h-16 mx-auto dark:invert"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4 max-w-4xl w-full px-4">
+        {examples.map((example, index) => (
+          <button
+            key={index}
+            onClick={() => onExampleClick(example)}
+            className="p-6 text-center rounded-lg bg-[var(--example-box)] hover:bg-gray-700/50 transition-colors"
+          >
+            <p className="text-[var(--foreground)]">{example}</p>
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default function ExampleList({
-  setShowExampleList,
-  searchBarRef
-}: {
-  setShowExampleList: Dispatch<SetStateAction<boolean>>;
-  searchBarRef: any;
-}) {
-  const exampleList = [
-    "네이버의 2025년 전망은 어때?",
-    "랩큐의 2025년 사업 계획을 알려줘",
-    "카카오의 2024년 2분기 수익률을 알려줘.",
-    "한화가 새로 시작한 사업이 있어?",
-  ];
-
-  return (
-    <div className="grid grid-cols-2 gap-4 w-full px-4">
-      {exampleList.map((text, index) => (
-        <Example 
-          key={index} 
-          text={text} 
-          setShowExampleList={setShowExampleList}
-          searchBarRef={searchBarRef}
-        />
-      ))}
-    </div>
-  );
-}
+export default ExampleList;
 
 
