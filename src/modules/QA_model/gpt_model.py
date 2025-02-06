@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class GPTModel(BaseModel):
-    def __init__(self, model_name="gpt-4o"):
+    def __init__(self, model_name="gpt-4o-mini"):
         self.api_key = os.environ['OPENAI_API_KEY']
         if not self.api_key:
             raise ValueError("환경 변수 'OPENAI_API_KEY'가 설정되지 않았습니다.")

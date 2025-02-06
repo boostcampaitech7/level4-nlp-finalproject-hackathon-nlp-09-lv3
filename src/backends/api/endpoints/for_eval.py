@@ -7,7 +7,7 @@ pipe.setup(model = 'GPT')
 app = FastAPI()
 
 @app.post("/query", response_model=QueryEvalResponse)
-async def query(request: QueryRequest):
+async def eval_query(request: QueryRequest):
 
     
     retrieval_results = pipe.Q(request.query, mode = 'ensemble')

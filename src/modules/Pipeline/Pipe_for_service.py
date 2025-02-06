@@ -203,7 +203,6 @@ class Pipeline_For_Service:
         response = router.answering(query)
         tool = response.tool
         query_or_answer = response.final_answer
-        test = query_or_answer
         if search_type == 'closed_domain':
             retrieval_results = self.Q(query, mode = mode)
             answer = self.A(query, retrieval_results,)

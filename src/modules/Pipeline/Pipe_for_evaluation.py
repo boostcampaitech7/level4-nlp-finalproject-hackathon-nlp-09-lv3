@@ -151,21 +151,25 @@ class Pipeline_For_Eval:
             generation_scores = []
             retrieval_scores = []
             generated_answers = []
+            retrieval_results_list = []
             
-            for idx, row in tqdm(eval_dataset.iterrows()):
+            for idx, row in tqdm(eval_dataset.iterrows(), total=len(eval_dataset)):
                 query = row['question']
                 ground_truth_answer = row['answer']
 
                 retrieval_results = self.Q(query, mode = mode)
+                retrieval_results_list.append(retrieval_results)
+
                 G_retrieval_score = G_retrieval_evaluate(query, retrieval_results)
                 retrieval_scores.append(G_retrieval_score)
 
                 generated_answer = self.A(query, retrieval_results)
                 generated_answers.append(generated_answer)
+
                 G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)    
                 generation_scores.append(G_generation_score)
 
-            eval_dataset['retrieval_results'] = retrieval_results
+            eval_dataset['retrieval_results'] = retrieval_results_list
             eval_dataset['generated_answer'] = generated_answers
             eval_dataset['retrieval_score'] = retrieval_scores
             eval_dataset['generation_score'] = generation_scores

@@ -7,7 +7,7 @@ pipe.setup()
 app = FastAPI()
 
 @app.post("/query_closed_domain", response_model=QueryServiceResponse)
-async def query(request: QueryRequest):
+async def closed_domain_query(request: QueryRequest):
     answer = pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
 
     return {
@@ -15,7 +15,7 @@ async def query(request: QueryRequest):
     }
 
 @app.post("/query_open_domain", response_model = QueryServiceResponse)
-async def query(request: QueryRequest):
+async def open_domain_query(request: QueryRequest):
     answer = pipe.QA(request.query, mode = 'ensemble', search_type = 'open_domain')
     return {
         "answer": answer
