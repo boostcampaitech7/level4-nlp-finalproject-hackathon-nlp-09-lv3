@@ -22,7 +22,7 @@ async def open_domain_query(request: QueryRequest):
     }
 
 @app.post("/query", response_model = QueryServiceResponse)
-async def query(request: QueryRequest):
+async def service_query(request: QueryRequest):
     answer = pipe.QA(request.query, mode = 'ensemble')
     return {
         "answer" : answer
