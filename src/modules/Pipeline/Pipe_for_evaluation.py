@@ -95,13 +95,13 @@ class Pipeline_For_Eval:
         [f"{file_names[idx]}: {retrieval_contents[idx].strip()}" for idx in range(len(retrieval_contents))]
         )
         prompt = f"""
-다음 참고 문서를 반드시 활용하여 질문에 대한 명확하고 신뢰할 수 있는 답변을 작성하세요.
+참고 문서를 반드시 활용하여 질문에 대한 명확하고 신뢰할 수 있는 답변을 작성하세요.
 
-답변은 500자 이내로 작성하세요.
-질문과 직접적으로 관련된 정보를 제공하세요.
-사실적으로 정확한 정보만 포함하세요.
-질문에 적절한 세부 정보를 포함하되, 명확하고 간결하게 작성하세요.
-출처를 반드시 명시하세요.
+답변은 300자 이내로 작성하세요.
+반드시 질문과 직접적으로 관련된 정보를 제공하세요.
+반드시 확실한 정보만 포함하세요.
+적절한 세부 정보를 포함하세요.
+참고한 문서의 이름을 반드시 명시하세요.
 
 질문: {query.strip()}
 참고 문서: {documents}"
@@ -175,5 +175,5 @@ class Pipeline_For_Eval:
             eval_dataset['generation_score'] = generation_scores
             
             print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
-            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt4.csv')
+            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt5.csv')
             return eval_dataset

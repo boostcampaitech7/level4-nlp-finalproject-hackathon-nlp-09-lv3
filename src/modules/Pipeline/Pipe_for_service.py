@@ -5,6 +5,9 @@ from retrievals import bm25, dpr, ensemble
 import shutil
 import json
 import subprocess
+import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 import tempfile
 import unicodedata
 from Finbuddy import crews
@@ -95,6 +98,36 @@ class Pipeline_For_Service:
         output_dir = "./output"
         # 폴더가 없으면 생성
         os.makedirs(output_dir, exist_ok=True)
+    async def async_multiple_crews(self, paragraph, image, table, inputs):
+
+        context_task = self.context_crew.kickoff_async(inputs=inputs) if paragraph else None
+        image_task = self.image_crew.kickoff_async(inputs=inputs) if image else None
+        table_task = self.table_crew.kickoff_async(inputs=inputs) if table else None
+        
+        tasks = tuple(task for task in [context_task, image_task, table_task] if task)
+        print(tasks)
+        results = await asyncio.gather(*tasks)
+        
+        context_result = results[0] if paragraph else ''
+        image_result = results[1] if image else ''
+        table_result = results[2] if table else ''
+        
+        while table:
+            try:
+                visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
+                table_result = table_result.raw
+                if self.verbose:
+                    print(visualize_code)
+                execute_code(visualize_code)
+                break  # 성공하면 반복 종료
+            except Exception as e:
+                if self.verbose:
+                    print(f"Error processing table, retrying: {e}")
+                table_result = self.table_crew.kickoff(inputs=inputs)
+        
+        final_inputs = {"context_result": context_result, "image_result": image_result, "table_result": table_result}
+        final_result = self.final_crew.kickoff(final_inputs)
+        return final_result
 
     def reset_output(self):
         output_dir = "./output"
@@ -148,32 +181,9 @@ class Pipeline_For_Service:
                 
             else:
                 pass
-        if paragraph:
-            context_result = self.context_crew.kickoff(inputs = inputs).raw
-        else:
-            context_result = ''
-        if image:
-            image_result = self.image_crew.kickoff(inputs = inputs).raw
-        else:
-            image_result = ''
-        if table:
-            togle = True
-            while togle:
-                try:
-                    table_result = self.table_crew.kickoff(inputs = inputs)
-                    visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
-                    if self.verbose:
-                        print(visualize_code)
-                    execute_code(visualize_code)
-                    table_result = table_result.raw
-                    togle = False
-                except:
-                    togle = True
-        else:
-            table_result = ''
-        final_result = self.final_crew.kickoff(inputs = {'context_result': context_result,
-                                                        'table_result' : table_result,
-                                                        'image_result' : image_result})
+
+        final_result = asyncio.run(self.async_multiple_crews(paragraph = paragraph, image = image, table = table,
+                                           inputs = inputs))
         
         file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
 
