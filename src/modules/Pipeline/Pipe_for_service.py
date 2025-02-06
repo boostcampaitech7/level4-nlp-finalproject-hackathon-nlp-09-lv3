@@ -105,13 +105,19 @@ class Pipeline_For_Service:
         table_task = self.table_crew.kickoff_async(inputs=inputs) if table else None
         
         tasks = tuple(task for task in [context_task, image_task, table_task] if task)
-        print(tasks)
         results = await asyncio.gather(*tasks)
+
+        context_result = ''
+        image_result = ''
+        table_result = ''
+        arr = [context_result, image_result, table_result]
+        togle = [paragraph, image, table]
+
+        for i in range(3):
+            if togle[i]:
+                arr[i] = results.pop()
         
-        context_result = results[0] if paragraph else ''
-        image_result = results[1] if image else ''
-        table_result = results[2] if table else ''
-        
+        self.test = arr
         while table:
             try:
                 visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
@@ -125,7 +131,9 @@ class Pipeline_For_Service:
                     print(f"Error processing table, retrying: {e}")
                 table_result = self.table_crew.kickoff(inputs=inputs)
         
-        final_inputs = {"context_result": context_result, "image_result": image_result, "table_result": table_result}
+        final_inputs = {"context_result": context_result.raw if context_result != '' else context_result,
+                         "image_result": image_result.raw if image_result != '' else image_result,
+                           "table_result": table_result}
         final_result = self.final_crew.kickoff(final_inputs)
         return final_result
 
@@ -193,7 +201,6 @@ class Pipeline_For_Service:
         final_result += table_str
         file_names = list(file_names)
         file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
-        self.test = file_names
         output_dir = "./output"
         for file in file_names:
             if os.path.exists(file):  # 파일이 존재하는지 확인
