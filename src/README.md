@@ -6,6 +6,14 @@
 > 정량, 정성평가를 위한 api endpoint api 및 응답/답변 schema, 라우터, 미들웨어가 지정돼 있습니다.
 파이프라인 코드를 활용하여 front로부터 받아온 query를 활용하여 답변을 내부 엔진에서 제작하여 제출합니다.
 
+api endpoint는 다음과 같습니다.
+### eval
+    [post] /api/for_eval/query : query를 받아 context와 answer을 제출합니다.
+### service
+    [post] /api/for_service/query_closed_domain : 내부 DB를 통해 질문에 해당하는 답변을 Agent Pipeline을 통해 출력합니다.
+    [post] /api/for_service/query_open_domain : 외부 검색 엔진을 통해 질문에 해당하는 답변을 네이버 뉴스에서 찾아 출력합니다.
+    [post] /api/for_service/query : RAG시스템을 사용할지 여부를 직접 판단하여 알맞는 답변을 내보냅니다.
+
 ## front
 > front잘모름 
 
