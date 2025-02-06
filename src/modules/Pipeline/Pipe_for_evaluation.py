@@ -175,5 +175,5 @@ class Pipeline_For_Eval:
             eval_dataset['generation_score'] = generation_scores
             
             print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
-            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt5.csv')
+            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt6.csv')
             return eval_dataset
