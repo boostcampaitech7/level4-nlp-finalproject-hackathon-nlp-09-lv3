@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { chatApi } from "../api/chatApi";
+import { openDomainApi,closedDomainApi } from "../api/chatApi";
 import { ClosedQueryRequest, ClosedQueryResponse } from "../types/dto/closedQueryService";
 
 // 쿼리 요청을 처리하는 hook
@@ -15,7 +15,7 @@ import { ClosedQueryRequest, ClosedQueryResponse } from "../types/dto/closedQuer
 // useMutation을 사용하여 API 요청을 처리
 export const useClosedQueryApi = () => {
   return useMutation({
-    mutationFn: (query: string) => chatApi({ query }), // mutationFn에 chatApi를 전달
+    mutationFn: (query: string) => closedDomainApi({ query }), // mutationFn에 chatApi를 전달
     onError: (error) => {
       console.error("Mutation 에러:", error);
     },

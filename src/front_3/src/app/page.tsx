@@ -2,6 +2,7 @@
 
 import { useState, useRef, Dispatch, SetStateAction } from "react";
 import { useClosedQueryApi } from "./store/useClosedQueryApi";// API 훅 임포트
+import { useOpenQueryApi } from "./store/useOpenQueryApi";// API 훅 임포트
 //import { closedQueryClient } from "./store/closedQueryClient";// API 훅 임포트
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ExampleList from "./components/ExampleList";
@@ -10,7 +11,7 @@ import ChatList from "./components/ChatList";
 import ThemeToggle from "./components/ThemeToggle";
 import ChatHistoryMenu from './components/ChatHistoryMenu';
 import type { ChatHistory } from './types/chatHistory';
-import { parseApiResponse } from './api/parsers/chatParser';
+import { parseClosedApiResponse } from './api/parsers/chatParser';
 import type { QAndA } from "./types/question";
 
 export const closedQueryClient = new QueryClient();
@@ -70,15 +71,20 @@ function HomeContent() {
 
     abortControllerRef.current = new AbortController();
 
+    //domain에 따라 다른 api 보내도록 바꿔보기
     try {
       const result = await mutate(submittedQuestion); // mutate 호출하여 API 요청
       console.log("API 응답 결과:", result);
 
-      // API 응답 파싱 및 상태 업데이트
+      // 🔹 API 응답을 parseClosedApiResponse로 변환
+      const parsedResponse = parseClosedApiResponse(result, submittedQuestion);
+
       const updatedQuestion = {
         ...newQuestion,
-        answer: result.answer,
-        error: false
+        answer: parsedResponse.answer,
+        error: false,
+        imageName: parsedResponse.imageName, // 이미지 정보 추가
+        fileNames: parsedResponse.fileNames  // 출처 정보 추가
       };
 
       const updatedList = questionList.length > 0 

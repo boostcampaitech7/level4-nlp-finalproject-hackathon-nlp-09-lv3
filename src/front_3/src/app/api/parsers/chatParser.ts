@@ -4,7 +4,7 @@ import type { QAndA } from '../../types/question';
 const BASE_URL = '/static/output';
 
 
-export const parseApiResponse = (
+export const parseClosedApiResponse = (
   response: ClosedQueryResponse, 
   question: string
 ): QAndA => {

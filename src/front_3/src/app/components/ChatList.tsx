@@ -84,9 +84,9 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                   ) : (
                     <div className="bg-[var(--example-box)] rounded-lg p-4">
                       <p className="text-[var(--foreground)]">{qa.answer}</p>
-                      {qa.imageNames?.length > 0 && (
+                      {qa.imageName?.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                          {qa.imageNames.map((imgUrl, idx) => (
+                          {qa.imageName.map((imgUrl, idx) => (
                             <img 
                               key={idx}
                               src={imgUrl}
