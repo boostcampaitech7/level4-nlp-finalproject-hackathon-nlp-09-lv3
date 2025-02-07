@@ -12,8 +12,8 @@ class TableCrew:
 
     @before_kickoff
     def before_kickoff_function(self, inputs):
-        return inputs # You can return the inputs or modify them as needed
-
+        return inputs 
+    
     @agent
     def code_generator(self) -> Agent:
         return Agent(

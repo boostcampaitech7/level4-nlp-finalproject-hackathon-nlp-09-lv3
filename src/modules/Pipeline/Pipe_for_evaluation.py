@@ -91,8 +91,9 @@ class Pipeline_For_Eval:
     def A(self, query, retrieval_results):
         retrieval_contents = [doc.metadata['original_content'] for doc in retrieval_results]
         file_names = [doc.metadata['file_name'] for doc in retrieval_results]
+        pages = [doc.metadata['page'] for doc in retrieval_results]
         documents = "\n".join(
-        [f"{file_names[idx]}: {retrieval_contents[idx].strip()}" for idx in range(len(retrieval_contents))]
+        [f"{file_names[idx]}, {pages[idx]} page : {retrieval_contents[idx].strip()}" for idx in range(len(retrieval_contents))]
         )
         prompt = f"""
 참고 문서를 반드시 활용하여 질문에 대한 명확하고 신뢰할 수 있는 답변을 작성하세요.
@@ -101,10 +102,11 @@ class Pipeline_For_Eval:
 반드시 질문과 직접적으로 관련된 정보를 제공하세요.
 반드시 확실한 정보만 포함하세요.
 적절한 세부 정보를 포함하세요.
-참고한 문서의 이름을 반드시 명시하세요.
+참고한 문서에 번호를 붙이고, 참고한 내용의 옆에 그 번호를 표기하세요.
+답변의 마지막에 반드시 번호를 붙인 참고 문서의 이름과 페이지를 명시하세요.
 
 질문: {query.strip()}
-참고 문서: {documents}"
+참고 문서: {documents}
 정답:"""
         if self.verbose:
             print(prompt)

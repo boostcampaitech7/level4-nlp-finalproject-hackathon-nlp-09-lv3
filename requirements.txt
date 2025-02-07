@@ -17,3 +17,5 @@ pytesseract==0.3.13
 markdown==3.7
 newspaper3k
 lxml-html-clean
+nest_asyncio
+seaborn

@@ -7,6 +7,7 @@ import json
 import subprocess
 import asyncio
 import nest_asyncio
+from voice import tts
 nest_asyncio.apply()
 import tempfile
 import unicodedata
@@ -55,6 +56,9 @@ class Pipeline_For_Service:
         folder_name = 'Service_DB_' + mode
         self.topk = topk
         self.model = None
+        self.chat_count = 0
+        self.file_names = []
+        self.audio_route = None
 
 
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
@@ -141,6 +145,7 @@ class Pipeline_For_Service:
         output_dir = "./output"
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
+        self.chat_count = 0
 
         os.makedirs(output_dir, exist_ok=True)
 
@@ -167,7 +172,7 @@ class Pipeline_For_Service:
         paragraph = False
         image = False
         table = False
-        inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : []},
+        inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : [], },
                                     'images': {'image' : [], 'summary' : [], 'file_name' : []},
                                     'tables': {'table': [], 'summary' : [], 'file_name': []}, }
         for i, doc in enumerate(retrieval_results):
@@ -190,29 +195,43 @@ class Pipeline_For_Service:
             else:
                 pass
 
-        final_result = asyncio.run(self.async_multiple_crews(paragraph = paragraph, image = image, table = table,
-                                           inputs = inputs))
+        loop = asyncio.get_event_loop()
+        final_result = loop.run_until_complete(self.async_multiple_crews(
+            paragraph=paragraph, image=image, table=table, inputs=inputs
+        ))
         
         file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
 
         final_result = final_result.raw + "\n\n[정보 출처] \n"
         table_str = "\n".join(f"- {file}" 
                             for idx, file in enumerate(file_names, start=1))
+        
+
         final_result += table_str
         file_names = list(file_names)
-        file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
+        self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
         output_dir = "./output"
+        
         for file in file_names:
             if os.path.exists(file):  # 파일이 존재하는지 확인
                 shutil.copy(file, output_dir)  # 파일 복사
             else:
                 pass
-        return final_result
+
+        self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
+        self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
+        self.chat_count += 1
+
+        return final_result, self.file_names, self.audio_route, self.chat_count
 
 
     def news_search_A(self, query):
         inputs = {'query': query}
         answer = self.news_crew.kickoff(inputs = inputs)
+        self.file_names = None
+        output_dir = "./output"
+        self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
+        self.chat_count += 1
         return answer.raw
     
     def QA(self, query:str, mode = 'ensemble', search_type = None):
@@ -236,6 +255,6 @@ class Pipeline_For_Service:
             if tool == '직접 답변':
                 answer = query_or_answer
 
-        return answer
+        return answer, self.file_names, self.audio_route
 
 

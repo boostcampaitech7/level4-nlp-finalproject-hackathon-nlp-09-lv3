@@ -32,4 +32,6 @@ def get_only_paragraphs(BASE_DIR):
     df = df[df['type'] == 'paragraph']
     return df
 
-
+def get_pdf_routes(BASE_DIR):
+    pdf_routes = glob(os.path.join(BASE_DIR, '*/*.pdf'))
+    return pdf_routes
