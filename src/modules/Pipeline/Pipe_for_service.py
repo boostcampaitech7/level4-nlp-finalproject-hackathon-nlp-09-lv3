@@ -110,18 +110,18 @@ class Pipeline_For_Service:
         
         tasks = tuple(task for task in [context_task, image_task, table_task] if task)
         results = await asyncio.gather(*tasks)
-
+        
         context_result = ''
         image_result = ''
         table_result = ''
-        arr = [context_result, image_result, table_result]
-        togle = [paragraph, image, table]
+        for task in results:
+            if task.tasks_output[-1].name == 'context_analysis_task':
+                context_result = task
+            elif task.tasks_output[-1].name == 'answer_task':
+                table_result = task
+            elif task.tasks_output[-1].name == 'graph_analysis_task':
+                image_result = task
 
-        for i in range(3):
-            if togle[i]:
-                arr[i] = results.pop()
-        
-        self.test = arr
         while table:
             try:
                 visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
