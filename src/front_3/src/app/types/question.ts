@@ -9,6 +9,7 @@ export interface QAndA {
     answer: string;
     context: string;
     error: boolean;
-    imageNames: string[];
+    imageName: string;
     fileNames: string[];
+    audioFileName : string;
   }

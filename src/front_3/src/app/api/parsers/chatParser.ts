@@ -1,7 +1,7 @@
 import type { ClosedQueryResponse } from '../../types/dto/closedQueryService'; 
 import type { QAndA } from '../../types/question';
 
-const BASE_URL = '/static/output/output';
+const BASE_URL = '/static/output';
 
 
 export const parseApiResponse = (
@@ -18,19 +18,19 @@ export const parseApiResponse = (
   
   console.log('원본 이미지 섹션:', imageNameSection); // 디버깅용
 
-  const imageNames = imageNameSection
+  const imageName = imageNameSection
     .split('\n')  // 줄바꿈으로 분리 (쉼표가 아님)
     .map(name => name.trim())
     .filter(name => name.length > 0)
     .map(path => {
       console.log('처리 전 경로:', path); // 디버깅용
       const fileName = path.split('/').pop() || '';
-      const newPath = `/static/output/output/${fileName}`;
+      const newPath = `/static/output/${fileName}`;
       console.log('처리 후 경로:', newPath); // 디버깅용
       return newPath;
-    });
+    }).at(0) || '';  // 첫 번째 요소를 가져옴, 없으면 빈 문자열
 
-  console.log('최종 imageNames:', imageNames); // 디버깅용
+  console.log('최종 imageName:', imageName); // 디버깅용
 
   const fileNames = sourceSection
     .split('\n')
@@ -43,7 +43,8 @@ export const parseApiResponse = (
     answer: context.trim(),
     context: '',
     error: false,
-    imageNames,
-    fileNames
+    imageName,
+    fileNames,
+    audioFileName
   };
 };
