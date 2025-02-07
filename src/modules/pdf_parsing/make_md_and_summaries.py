@@ -1,7 +1,7 @@
 import os
 import pandas as pd
-from summarizer_for_rag import image_summarization, table_summarization, text_summarization, text_summarization_Hyperclova
-from cropper import crop_and_save
+from .summarizer_for_rag import image_summarization, table_summarization, text_summarization, text_summarization_Hyperclova
+from .cropper import crop_and_save
 from bs4 import BeautifulSoup
 
 def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
@@ -24,7 +24,7 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
     for item in elements:
         element_id = item['id']
         with open(md_file, 'a', encoding='utf-8') as md:
-            if item['category'] == 'figure':
+            if item['category'] == 'figure' or item['category'] == 'chart' :
                 # 이미지 루트를 반환하는 crop_and_save 함수 호출
                 image_route = crop_and_save(BASE_DIR, route, item['page'], item['coordinates'], item['id'])
                 # 이미지 경로를 Markdown 형식으로 추가

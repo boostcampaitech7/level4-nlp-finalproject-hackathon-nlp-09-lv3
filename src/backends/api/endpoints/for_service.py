@@ -8,24 +8,30 @@ app = FastAPI()
 
 @app.post("/query_closed_domain", response_model=QueryServiceResponse)
 async def closed_domain_query(request: QueryRequest):
-    answer = pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
+    answer, file_names, audio_route, chat_count = pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
 
     return {
-        "answer": answer
+        "answer": answer,
+        "pdfFileNames" : file_names,
+        "audioFileNames" : audio_route,
     }
 
 @app.post("/query_open_domain", response_model = QueryServiceResponse)
 async def open_domain_query(request: QueryRequest):
-    answer = pipe.QA(request.query, mode = 'ensemble', search_type = 'open_domain')
+    answer, file_names, audio_route, chat_count = pipe.QA(request.query, mode = 'ensemble', search_type = 'open_domain')
     return {
-        "answer": answer
+        "answer": answer,
+        "pdfFileNames" : file_names,
+        "audioFileNames" : audio_route,
     }
 
 @app.post("/query", response_model = QueryServiceResponse)
 async def service_query(request: QueryRequest):
-    answer = pipe.QA(request.query, mode = 'ensemble')
+    answer, file_names, audio_route, chat_count = pipe.QA(request.query, mode = 'ensemble')
     return {
-        "answer" : answer
+        "answer": answer,
+        "pdfFileNames" : file_names,
+        "audioFileNames" : audio_route,
     }
 
 @app.get("/reset_output")
