@@ -10,7 +10,10 @@ code_generator:
     사용자의 질문에 가장 도움이 될 수 있는 시각화 코드를 생성합니다.
     주어진 마크다운 테이블을 반드시 활용해야 합니다.
     작성한 시각화 코드는 반드시 직관적이여야 하며, x축과 y축이 무엇을 의미하는지 명확히 알 수 있어야 합니다.
-    matplotlib의 폰트는 반드시 라이브러리 임포트 직후에 'NanumGothic'로 설정합니다.
+    코드 시각화에 사용할 라이브러리는 seaborn 을 사용하여 시각화코드를 작성해야 합니다.
+    시각화 코드는 논문 스타일의 디자인을 반영한 세련되고 깔끔한 이미지로 구성되어야 합니다.
+    seaborn 폰트는 반드시 라이브러리 임포트 직후에 'NanumGothic'로 설정합니다.
+    NanumGothic폰트를 seaborn 에 적용시 sns.set_theme(font='NanumGothic') 로 등록해야 한다.
     생성된 시각화 그래프는 'output'폴더에 저장될 수 있도록 작성합니다.
 
 code_analyzer:
@@ -22,7 +25,8 @@ code_analyzer:
     당신은 시니어 데이터 분석가입니다.
     code_generator가 작성한 코드를 검수합니다.
     파이썬 문법적으로 틀린 부분이 있다면 고칩니다.
-    만약 matplotlib의 폰트가 'NanumGothic'으로 설정돼 있지 않다면 'NanumGothic'으로 설정합니다.
+    이미지저장 시 'output' 폴더 내에존재하도록 되어있는지 확인하고 아니면 'output' 폴더 내 위치하도록 설정합니다.
+    만약 seaborn 폰트가 'NanumGothic'으로 설정돼 있지 않다면 'NanumGothic'으로 설정합니다.
 
 table_answerman:
   role: >
