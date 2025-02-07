@@ -245,10 +245,16 @@ class Pipeline_For_Service:
             retrieval_results = self.Q(query, mode = mode)
             answer, file_name, audio_route, chat_count = await self.A(query, retrieval_results,)
         elif search_type == 'open_domain':
-            answer, file_name, audio_route, chat_count = self.news_search_A(query_or_answer)
+            answer = self.news_search_A(query_or_answer)
+            file_name = self.file_names
+            audio_route = self.audio_route
+            chat_count = self.chat_count
         else:
             if response.tool == '최신 뉴스기사 검색':
-                answer, file_name, audio_route, chat_count = self.news_search_A(query_or_answer)
+                answer = self.news_search_A(query_or_answer)
+                file_name = self.file_names
+                audio_route = self.audio_route
+                chat_count = self.chat_count
 
             if tool == '내부 주식 리포트 RAG':
                 retrieval_results = self.Q(query, mode = mode)
