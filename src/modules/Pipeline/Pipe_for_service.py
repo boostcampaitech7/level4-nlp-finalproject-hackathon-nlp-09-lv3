@@ -230,7 +230,7 @@ class Pipeline_For_Service:
     def news_search_A(self, query):
         inputs = {'query': query}
         answer = self.news_crew.kickoff(inputs = inputs).raw
-        self.file_names = None
+        self.file_names = []
         output_dir = "./output"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
         self.chat_count += 1
@@ -262,7 +262,7 @@ class Pipeline_For_Service:
             
             if tool == '직접 답변':
                 answer = query_or_answer
-                file_name = ''
+                file_name = []
                 audio_route = tts(answer)
                 self.chat_count += 1
                 chat_count = self.chat_count
