@@ -220,7 +220,6 @@ class Pipeline_For_Service:
 
         self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
         self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
-        self.audio_route = ''
         self.chat_count += 1
 
 
@@ -230,6 +229,7 @@ class Pipeline_For_Service:
     def news_search_A(self, query):
         inputs = {'query': query}
         answer = self.news_crew.kickoff(inputs = inputs).raw
+        print(answer)
         self.file_names = []
         output_dir = "./output"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
