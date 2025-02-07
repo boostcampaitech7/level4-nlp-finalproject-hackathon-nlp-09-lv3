@@ -95,13 +95,13 @@ class Pipeline_For_Eval:
         [f"{file_names[idx]}: {retrieval_contents[idx].strip()}" for idx in range(len(retrieval_contents))]
         )
         prompt = f"""
-다음 참고 문서를 반드시 활용하여 질문에 대한 명확하고 신뢰할 수 있는 답변을 작성하세요.
+참고 문서를 반드시 활용하여 질문에 대한 명확하고 신뢰할 수 있는 답변을 작성하세요.
 
-답변은 500자 이내로 작성하세요.
-질문과 직접적으로 관련된 정보를 제공하세요.
-사실적으로 정확한 정보만 포함하세요.
-질문에 적절한 세부 정보를 포함하되, 명확하고 간결하게 작성하세요.
-출처를 반드시 명시하세요.
+답변은 300자 이내로 작성하세요.
+반드시 질문과 직접적으로 관련된 정보를 제공하세요.
+반드시 확실한 정보만 포함하세요.
+적절한 세부 정보를 포함하세요.
+참고한 문서의 이름을 반드시 명시하세요.
 
 질문: {query.strip()}
 참고 문서: {documents}"
@@ -151,25 +151,29 @@ class Pipeline_For_Eval:
             generation_scores = []
             retrieval_scores = []
             generated_answers = []
+            retrieval_results_list = []
             
-            for idx, row in tqdm(eval_dataset.iterrows()):
+            for idx, row in tqdm(eval_dataset.iterrows(), total=len(eval_dataset)):
                 query = row['question']
                 ground_truth_answer = row['answer']
 
                 retrieval_results = self.Q(query, mode = mode)
+                retrieval_results_list.append(retrieval_results)
+
                 G_retrieval_score = G_retrieval_evaluate(query, retrieval_results)
                 retrieval_scores.append(G_retrieval_score)
 
                 generated_answer = self.A(query, retrieval_results)
                 generated_answers.append(generated_answer)
+
                 G_generation_score = G_generation_evaluate(query, ground_truth_answer, generated_answer)    
                 generation_scores.append(G_generation_score)
 
-            eval_dataset['retrieval_results'] = retrieval_results
+            eval_dataset['retrieval_results'] = retrieval_results_list
             eval_dataset['generated_answer'] = generated_answers
             eval_dataset['retrieval_score'] = retrieval_scores
             eval_dataset['generation_score'] = generation_scores
             
             print(len(eval_dataset),'에 대한 평가를 마쳤습니다.')
-            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt4.csv')
+            eval_dataset.to_csv(f'modules/datas/g_eval_result_{self.model_name}_prompt6.csv')
             return eval_dataset
