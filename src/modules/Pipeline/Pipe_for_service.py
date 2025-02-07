@@ -168,61 +168,111 @@ class Pipeline_For_Service:
                 print(i)
         return result[:self.topk]
     
-    def A(self, query, retrieval_results):
-        paragraph = False
-        image = False
-        table = False
-        inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : [], },
-                                    'images': {'image' : [], 'summary' : [], 'file_name' : []},
-                                    'tables': {'table': [], 'summary' : [], 'file_name': []}, }
-        for i, doc in enumerate(retrieval_results):
+    # def A(self, query, retrieval_results):
+    #     paragraph = False
+    #     image = False
+    #     table = False
+    #     inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : [], },
+    #                                 'images': {'image' : [], 'summary' : [], 'file_name' : []},
+    #                                 'tables': {'table': [], 'summary' : [], 'file_name': []}, }
+    #     for i, doc in enumerate(retrieval_results):
+    #         if doc.metadata['type'] == 'paragraph':
+    #             inputs['paragraphs']['paragraph'].append(doc.metadata['original_content'])
+    #             inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFD",(doc.metadata['file_name'])))
+    #             paragraph = True
+
+    #         elif doc.metadata['type'] == 'figure':
+    #             inputs['images']['file_name'].append(unicodedata.normalize("NFD", doc.metadata['file_name']))
+    #             inputs['images']['summary'].append(doc.page_content)
+    #             image = True
+
+    #         elif doc.metadata['type'] == 'table':
+    #             inputs['tables']['table'].append(doc.metadata['table'])
+    #             inputs['tables']['summary'].append(doc.page_content)
+    #             inputs['tables']['file_name'].append(unicodedata.normalize("NFD",doc.metadata['file_name']))
+    #             table = True
+                
+    #         else:
+    #             pass
+
+    #     loop = asyncio.get_event_loop()
+    #     final_result = loop.run_until_complete(self.async_multiple_crews(
+    #         paragraph=paragraph, image=image, table=table, inputs=inputs
+    #     ))
+        
+    #     file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
+
+    #     final_result = final_result.raw + "\n\n[정보 출처] \n"
+    #     table_str = "\n".join(f"- {file}" 
+    #                         for idx, file in enumerate(file_names, start=1))
+        
+
+    #     final_result += table_str
+    #     file_names = list(file_names)
+    #     self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
+    #     output_dir = "./output"
+        
+    #     for file in file_names:
+    #         if os.path.exists(file):  # 파일이 존재하는지 확인
+    #             shutil.copy(file, output_dir)  # 파일 복사
+    #         else:
+    #             pass
+
+    #     self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
+    #     self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
+    #     self.chat_count += 1
+
+    #     return final_result, self.file_names, self.audio_route, self.chat_count
+    
+    async def A(self, query, retrieval_results):
+        # retrieval_results에 따른 inputs 구성 등 동기 처리 부분은 그대로?
+        inputs = {'query': query,
+                'paragraphs': {'paragraph': [], 'file_name': []},
+                'images': {'image': [], 'summary': [], 'file_name': []},
+                'tables': {'table': [], 'summary': [], 'file_name': []}}
+        paragraph = image = table = False
+
+        for doc in retrieval_results:
             if doc.metadata['type'] == 'paragraph':
                 inputs['paragraphs']['paragraph'].append(doc.metadata['original_content'])
-                inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFD",(doc.metadata['file_name'])))
+                inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFD", doc.metadata['file_name']))
                 paragraph = True
-
             elif doc.metadata['type'] == 'figure':
                 inputs['images']['file_name'].append(unicodedata.normalize("NFD", doc.metadata['file_name']))
                 inputs['images']['summary'].append(doc.page_content)
                 image = True
-
             elif doc.metadata['type'] == 'table':
                 inputs['tables']['table'].append(doc.metadata['table'])
                 inputs['tables']['summary'].append(doc.page_content)
-                inputs['tables']['file_name'].append(unicodedata.normalize("NFD",doc.metadata['file_name']))
+                inputs['tables']['file_name'].append(unicodedata.normalize("NFD", doc.metadata['file_name']))
                 table = True
-                
-            else:
-                pass
 
-        loop = asyncio.get_event_loop()
-        final_result = loop.run_until_complete(self.async_multiple_crews(
+        # await를 사용해 비동기 함수 호출
+        final_result = await self.async_multiple_crews(
             paragraph=paragraph, image=image, table=table, inputs=inputs
-        ))
-        
-        file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
+        )
 
-        final_result = final_result.raw + "\n\n[정보 출처] \n"
-        table_str = "\n".join(f"- {file}" 
-                            for idx, file in enumerate(file_names, start=1))
-        
+        # 나머지 동기 처리 부분 (파일 복사, tts 등)
+        file_names = set(inputs['paragraphs']['file_name'] +
+                        inputs['images']['file_name'] +
+                        inputs['tables']['file_name'])
 
-        final_result += table_str
-        file_names = list(file_names)
-        self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
+        final_result_text = final_result.raw + "\n\n[정보 출처] \n"
+        file_list_str = "\n".join(f"- {file}" for file in file_names)
+        final_result_text += file_list_str
+
+        # 예시: 동기 tts 호출 (만약 TTS도 blocking하면 async 라이브러리로 대체하거나 run_in_executor 사용 고려)
         output_dir = "./output"
-        
         for file in file_names:
-            if os.path.exists(file):  # 파일이 존재하는지 확인
-                shutil.copy(file, output_dir)  # 파일 복사
-            else:
-                pass
+            if os.path.exists(file):
+                shutil.copy(file, output_dir)
 
-        self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
-        self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
+        self.file_names = list(map(lambda x: unicodedata.normalize("NFD", './modules/datas/pdfs/' + x), file_names))
+        self.audio_route = tts(final_result_text, save_dir=output_dir, cnt=self.chat_count)
         self.chat_count += 1
 
-        return final_result, self.file_names, self.audio_route, self.chat_count
+        return final_result_text, self.file_names, self.audio_route, self.chat_count
+
 
 
     def news_search_A(self, query):
@@ -234,27 +284,56 @@ class Pipeline_For_Service:
         self.chat_count += 1
         return answer.raw
     
-    def QA(self, query:str, mode = 'ensemble', search_type = None):
+    # def QA(self, query:str, mode = 'ensemble', search_type = None):
+    #     router = GPT_Router()
+    #     response = router.answering(query)
+    #     tool = response.tool
+    #     query_or_answer = response.final_answer
+    #     if search_type == 'closed_domain':
+    #         retrieval_results = self.Q(query, mode = mode)
+    #         answer = self.A(query, retrieval_results,)
+    #     elif search_type == 'open_domain':
+    #         answer = self.news_search_A(query_or_answer)
+    #     else:
+    #         if response.tool == '최신 뉴스기사 검색':
+    #             answer = self.news_search_A(query_or_answer)
+
+    #         if tool == '내부 주식 리포트 RAG':
+    #             retrieval_results = self.Q(query, mode = mode)
+    #             answer = self.A(query, retrieval_results,)
+            
+    #         if tool == '직접 답변':
+    #             answer = query_or_answer
+
+    #     return answer, self.file_names, self.audio_route
+    
+    async def QA(self, query: str, mode='ensemble', search_type=None):
         router = GPT_Router()
         response = router.answering(query)
         tool = response.tool
         query_or_answer = response.final_answer
+
         if search_type == 'closed_domain':
-            retrieval_results = self.Q(query, mode = mode)
-            answer = self.A(query, retrieval_results,)
+            retrieval_results = self.Q(query, mode=mode)  # retrieval은 동기 처리여도 무방
+            answer, file_names, audio_route, chat_count = await self.A(query, retrieval_results)
         elif search_type == 'open_domain':
-            answer = self.news_search_A(query_or_answer)
+            answer = self.news_search_A(query_or_answer)  # 만약 이 부분이 blocking이면 별도 async 처리 고려
+            file_names = self.file_names
+            audio_route = self.audio_route
         else:
-            if response.tool == '최신 뉴스기사 검색':
+            if tool == '최신 뉴스기사 검색':
                 answer = self.news_search_A(query_or_answer)
-
-            if tool == '내부 주식 리포트 RAG':
-                retrieval_results = self.Q(query, mode = mode)
-                answer = self.A(query, retrieval_results,)
-            
-            if tool == '직접 답변':
+                file_names = self.file_names
+                audio_route = self.audio_route
+            elif tool == '내부 주식 리포트 RAG':
+                retrieval_results = self.Q(query, mode=mode)
+                answer, file_names, audio_route, chat_count = await self.A(query, retrieval_results)
+            elif tool == '직접 답변':
                 answer = query_or_answer
+                file_names = self.file_names
+                audio_route = self.audio_route
 
-        return answer, self.file_names, self.audio_route
+        return answer, file_names, audio_route
+
 
 
