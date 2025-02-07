@@ -4,7 +4,10 @@ load_dotenv()
 import os
 import sys
 import urllib.request
+import re
 def tts(text, cnt, save_dir):
+    text = re.sub(r"[^가-힣a-zA-Z0-9\s]", "", text)
+
     client_id = os.environ['NAVER_CLOUD_VOICE_KEY']
     client_secret = os.environ['NAVER_CLOUD_VOICE_SECRET']
     data = "speaker=nara_call&volume=0&speed=-2&pitch=0&format=mp3&text=" + text
