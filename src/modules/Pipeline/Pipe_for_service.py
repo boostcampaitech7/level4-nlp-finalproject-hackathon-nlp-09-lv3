@@ -229,12 +229,12 @@ class Pipeline_For_Service:
 
     def news_search_A(self, query):
         inputs = {'query': query}
-        answer = self.news_crew.kickoff(inputs = inputs)
+        answer = self.news_crew.kickoff(inputs = inputs).raw
         self.file_names = None
         output_dir = "./output"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
         self.chat_count += 1
-        return answer.raw
+        return answer
     
     async def QA(self, query:str, mode = 'ensemble', search_type = None):
         router = GPT_Router()
