@@ -36,9 +36,11 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
                      'image_route' : image_route,
                      'dir_route' : dir_route,
                      'file_name' : route.split('/')[-1],
+                     'original_content' : None,
                      'page' : item['page'],
                      'investment' : investment,
                      'company_name' : company_name,
+                     'table' : None,
                      'summary' : summary,
                     }
                 )
@@ -56,6 +58,7 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
                      'image_route' : image_route,
                      'dir_route' : dir_route,
                      'file_name' : route.split('/')[-1],
+                     'original_content' : None,
                      'page' : item['page'],
                      'investment' : investment,
                      'company_name' : company_name,
@@ -72,12 +75,14 @@ def make_md(BASE_DIR, route, elements,  model = 'hyperclova'):
                     summaries.append(
                         {'id' : element_id,
                         'type' : item['category'],
+                        'iamge_route' : None,
                         'dir_route' : dir_route,
-                        'original_content' : html_content,
                         'file_name' : route.split('/')[-1],
+                        'original_content' : html_content,
                         'page' : item['page'],
                         'investment' : investment,
                         'company_name' : company_name,
+                        'table' : None,
                         'summary' : summary,
                         }
                     )

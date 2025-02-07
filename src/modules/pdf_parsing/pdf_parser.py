@@ -14,7 +14,7 @@ def pdf_to_md_and_csv(BASE_DIR = './datas'):
     BASE_DIR = temp
     results = []
 
-    for pdf in tqdm(pdfs, desc = 'pdf 문서 파싱중..'):
+    for pdf in tqdm(pdfs[20:], desc = 'pdf 문서 파싱중..'):
         elements = parsing(BASE_DIR = BASE_DIR, route = pdf)['elements']
         result = make_md(BASE_DIR = BASE_DIR, route = pdf, elements = elements,)
         results.append(result)

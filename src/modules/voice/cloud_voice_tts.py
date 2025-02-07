@@ -7,7 +7,6 @@ import urllib.request
 def tts(text, cnt, save_dir):
     client_id = os.environ['NAVER_CLOUD_VOICE_KEY']
     client_secret = os.environ['NAVER_CLOUD_VOICE_SECRET']
-    text = urllib.parse.quote("반갑습니다 네이버")
     data = "speaker=nara_call&volume=0&speed=-2&pitch=0&format=mp3&text=" + text
     url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts"
     request = urllib.request.Request(url)
