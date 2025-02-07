@@ -12,3 +12,5 @@ class QueryEvalResponse(BaseModel):
 
 class QueryServiceResponse(BaseModel):
     answer: str
+    pdfFileNames: List[str]
+    audioFileNames: str

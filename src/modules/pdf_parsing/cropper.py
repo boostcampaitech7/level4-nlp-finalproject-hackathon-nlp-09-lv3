@@ -14,7 +14,7 @@ def crop_and_save(BASE_DIR, route, page_num, coords, id, dpi=500, scale = 15):
     os.makedirs(BASE_DIR, exist_ok = True)
     with pdfplumber.open(route) as pdf:
         page = pdf.pages[page_num-1]
-    dir_route = f'{BASE_DIR}/{route.split('/')[-1][:-4]}'
+    dir_route = f"{BASE_DIR}/{route.split('/')[-1][:-4]}"
     save_route = dir_route + f'/page_{page_num}_id_{id}_image.png'
     os.makedirs(dir_route, exist_ok=True)
     page_width = page.width
