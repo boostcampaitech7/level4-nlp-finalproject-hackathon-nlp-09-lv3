@@ -102,6 +102,8 @@ class Pipeline_For_Service:
         output_dir = "./output"
         # 폴더가 없으면 생성
         os.makedirs(output_dir, exist_ok=True)
+
+        
     async def async_multiple_crews(self, paragraph, image, table, inputs):
 
         context_task = self.context_crew.kickoff_async(inputs=inputs) if paragraph else None
@@ -121,7 +123,6 @@ class Pipeline_For_Service:
                 table_result = task
             elif task.tasks_output[-1].name == 'graph_analysis_task':
                 image_result = task
-
         while table:
             try:
                 visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
@@ -168,7 +169,7 @@ class Pipeline_For_Service:
                 print(i)
         return result[:self.topk]
     
-    def A(self, query, retrieval_results):
+    async def A(self, query, retrieval_results):
         paragraph = False
         image = False
         table = False
@@ -195,10 +196,9 @@ class Pipeline_For_Service:
             else:
                 pass
 
-        loop = asyncio.get_event_loop()
-        final_result = loop.run_until_complete(self.async_multiple_crews(
+        final_result = await self.async_multiple_crews(
             paragraph=paragraph, image=image, table=table, inputs=inputs
-        ))
+        )
         
         file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
 
@@ -220,7 +220,9 @@ class Pipeline_For_Service:
 
         self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
         self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
+        self.audio_route = ''
         self.chat_count += 1
+
 
         return final_result, self.file_names, self.audio_route, self.chat_count
 
@@ -234,27 +236,31 @@ class Pipeline_For_Service:
         self.chat_count += 1
         return answer.raw
     
-    def QA(self, query:str, mode = 'ensemble', search_type = None):
+    async def QA(self, query:str, mode = 'ensemble', search_type = None):
         router = GPT_Router()
         response = router.answering(query)
         tool = response.tool
         query_or_answer = response.final_answer
         if search_type == 'closed_domain':
             retrieval_results = self.Q(query, mode = mode)
-            answer = self.A(query, retrieval_results,)
+            answer, file_name, audio_route, chat_count = await self.A(query, retrieval_results,)
         elif search_type == 'open_domain':
-            answer = self.news_search_A(query_or_answer)
+            answer, file_name, audio_route, chat_count = self.news_search_A(query_or_answer)
         else:
             if response.tool == '최신 뉴스기사 검색':
-                answer = self.news_search_A(query_or_answer)
+                answer, file_name, audio_route, chat_count = self.news_search_A(query_or_answer)
 
             if tool == '내부 주식 리포트 RAG':
                 retrieval_results = self.Q(query, mode = mode)
-                answer = self.A(query, retrieval_results,)
+                answer, file_name, audio_route, chat_count = await self.A(query, retrieval_results,)
             
             if tool == '직접 답변':
                 answer = query_or_answer
+                file_name = ''
+                audio_route = tts(answer)
+                self.chat_count += 1
+                chat_count = self.chat_count
 
-        return answer, self.file_names, self.audio_route
+        return answer, file_name, audio_route, chat_count
 
 

@@ -8,7 +8,7 @@ app = FastAPI()
 
 @app.post("/query_closed_domain", response_model=QueryServiceResponse)
 async def closed_domain_query(request: QueryRequest):
-    answer, file_names, audio_route, chat_count = pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
+    answer, file_names, audio_route, chat_count = await pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
 
     return {
         "answer": answer,
