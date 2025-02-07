@@ -59,7 +59,7 @@ class Pipeline_For_Service:
         self.chat_count = 0
         self.file_names = []
         self.audio_route = None
-
+        self.reset_output()
 
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
             print('생성된 DB가 있어 로드합니다.')
@@ -99,6 +99,9 @@ class Pipeline_For_Service:
                 for agent in crew.agents:
                     agent.verbose = False
                     
+        output_dir = "./tts_result"
+        # 폴더가 없으면 생성
+        os.makedirs(output_dir, exist_ok=True)
         output_dir = "./output"
         # 폴더가 없으면 생성
         os.makedirs(output_dir, exist_ok=True)
@@ -144,6 +147,10 @@ class Pipeline_For_Service:
 
     def reset_output(self):
         output_dir = "./output"
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+        output_dir = "./tts_result"
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
         self.chat_count = 0
@@ -210,7 +217,7 @@ class Pipeline_For_Service:
         final_result += table_str
         file_names = list(file_names)
         self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
-        output_dir = "./output"
+        output_dir = "./tts_result"
         
         for file in file_names:
             if os.path.exists(file):  # 파일이 존재하는지 확인
@@ -219,6 +226,7 @@ class Pipeline_For_Service:
                 pass
 
         self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
+        self.test = final_result
         self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
         self.chat_count += 1
 
@@ -231,7 +239,7 @@ class Pipeline_For_Service:
         answer = self.news_crew.kickoff(inputs = inputs).raw
         print(answer)
         self.file_names = []
-        output_dir = "./output"
+        output_dir = "./tts_result"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
         self.chat_count += 1
         return answer
@@ -263,9 +271,11 @@ class Pipeline_For_Service:
             if tool == '직접 답변':
                 answer = query_or_answer
                 file_name = []
-                audio_route = tts(answer)
+                output_dir = "./tts_result"
+                
                 self.chat_count += 1
                 chat_count = self.chat_count
+                audio_route = tts(answer, save_dir = output_dir, cnt = chat_count)
 
         return answer, file_name, audio_route, chat_count
 
