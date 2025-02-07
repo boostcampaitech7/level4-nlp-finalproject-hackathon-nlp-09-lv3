@@ -72,6 +72,7 @@ function HomeContent() {
     abortControllerRef.current = new AbortController();
 
     //domain에 따라 다른 api 보내도록 바꿔보기
+    //null -> query, open -> open, close -> closed
     try {
       const result = await mutate(submittedQuestion); // mutate 호출하여 API 요청
       console.log("API 응답 결과:", result);
