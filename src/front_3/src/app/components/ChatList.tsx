@@ -11,9 +11,69 @@ interface ChatListProps {
 const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListProps) => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // 현재 재생 중인 오디오 인스턴스를 저장하는 ref
+  const currentAudioRef = useRef<{ audio: HTMLAudioElement; url: string } | null>(null);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [questionList]);
+
+  // TTS 오디오 재생/일시정지 토글 함수
+  const playAudio = (audioUrl: string) => {
+    // 만약 이미 재생 중인 오디오가 있고, 같은 파일이면 토글
+    if (currentAudioRef.current && currentAudioRef.current.url === audioUrl) {
+      if (!currentAudioRef.current.audio.paused) {
+        currentAudioRef.current.audio.pause();
+      } else {
+        currentAudioRef.current.audio.play().catch(error => {
+          console.error("오디오 재생 오류:", error);
+        });
+      }
+      return;
+    }
+    // 다른 파일이거나 아직 오디오가 없다면, 이전 오디오가 있다면 정지
+    if (currentAudioRef.current) {
+      currentAudioRef.current.audio.pause();
+    }
+    const audio = new Audio(audioUrl);
+    // 재생이 끝나면 ref 초기화
+    audio.onended = () => {
+      currentAudioRef.current = null;
+    };
+    currentAudioRef.current = { audio, url: audioUrl };
+    audio.play().catch(error => {
+      console.error("오디오 재생 오류:", error);
+    });
+  };
+
+  // PDF 파일 다운로드용 함수 (아래에서 사용)
+  // const downloadFile = (url: string) => {
+  //   // 절대 URL을 생성하고 NFC 정규화를 적용합니다.
+  //   const absoluteUrl = new URL(url, window.location.origin).href.normalize('NFC');
+  //   console.log("다운로드 요청 URL:", absoluteUrl);
+    
+  //   fetch(absoluteUrl)
+  //     .then((res) => {
+  //       if (!res.ok) {
+  //         throw new Error('네트워크 응답이 올바르지 않습니다.');
+  //       }
+  //       return res.blob();
+  //     })
+  //     .then((blob) => {
+  //       const blobUrl = window.URL.createObjectURL(blob);
+  //       const a = document.createElement("a");
+  //       a.style.display = "none";
+  //       a.href = blobUrl;
+  //       // URL의 마지막 부분(파일명)을 디코딩해서 download 속성에 넣습니다.
+  //       a.download = decodeURIComponent(url.split('/').pop() || "download.pdf");
+  //       document.body.appendChild(a);
+  //       a.click();
+  //       window.URL.revokeObjectURL(blobUrl);
+  //       a.remove();
+  //     })
+  //     .catch((err) => console.error("다운로드 실패:", err));
+  // };
+  
 
   return (
     <div className="flex-1 overflow-y-auto pt-8 pb-32">
@@ -93,7 +153,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                             />
                           </div>
                         )}
-                      {qa.fileNames?.length > 0 && (
+                      {/* {qa.fileNames?.length > 0 && (
                         <div className="mt-4 space-y-2">
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                             참고 문서:
@@ -101,13 +161,48 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                           {qa.fileNames.map((fileUrl, idx) => (
                             <a
                               key={idx}
-                              href={fileUrl}
+                              href={encodeURI(fileUrl)}
                               download
                               className="block text-blue-600 dark:text-blue-400 hover:underline"
                             >
                               {decodeURIComponent(fileUrl.split('/').pop() || '')}
                             </a>
                           ))}
+                        </div>
+                      )} */}
+                      {qa.fileNames?.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            참고 문서:
+                          </p>
+                          {qa.fileNames.map((fileUrl, idx) => {
+                            const fileName = decodeURIComponent(fileUrl.split('/').pop() || 'download.pdf');
+                            return (
+                              <a
+                                key={idx}
+                                href={fileUrl}  // 원본 URL 그대로 사용
+                                download={fileName}  // download 속성에 올바른 파일명 지정
+                                className="block text-blue-600 dark:text-blue-400 hover:underline"
+                              >
+                                {fileName}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {qa.audioFileName && (
+                        <div className="mt-4">
+                          <button 
+                            onClick={() => playAudio(qa.audioFileName)}
+                            className="flex items-center space-x-2 p-2 bg-gray-100 rounded hover:bg-gray-200"
+                          >
+                            <img 
+                              src="/audio.png" 
+                              alt="Play Audio" 
+                              className="w-6 h-6"
+                            />
+                            <span className="text-sm text-gray-700">Play Audio</span>
+                          </button>
                         </div>
                       )}
                     </div>
