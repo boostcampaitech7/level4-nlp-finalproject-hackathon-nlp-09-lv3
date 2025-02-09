@@ -24,6 +24,7 @@ function HomeContent() {
   const [domain, setDomain] = useState<'open' | 'close' | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   
   const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -33,6 +34,7 @@ function HomeContent() {
   
 
   const handleExampleClick = (example: string) => {
+    setShowExampleList(false);  // 예시 질문 클릭 시에도 목록 숨김
     const formData = new FormData();
     formData.append('search', example);
     handleSubmit(formData);
@@ -43,10 +45,21 @@ function HomeContent() {
     
     if (!submittedQuestion?.trim()) return;
 
+    // 예시 질문 목록을 강제로 숨김
+    setShowExampleList(false);
+
+    // 입력 필드 초기화
+    if (searchBarRef.current) {
+      searchBarRef.current.setText('');
+    }
+
     const newQuestion = {
       question: submittedQuestion,
       answer: null,
     };
+
+    // 새 질문을 추가
+    setQuestionList(prev => [...prev, newQuestion]);
 
     let newId: string | null = null;
 
@@ -60,23 +73,19 @@ function HomeContent() {
         createdAt: new Date(),
       };
       setHistories(prev => [newHistory, ...prev]);
-      setQuestionList([newQuestion]);
     } else {
-      const updatedQuestionList = [...questionList, newQuestion];
-      setQuestionList(updatedQuestionList);
-      updateCurrentChat(updatedQuestionList);
+      updateCurrentChat([...questionList, newQuestion]);
     }
     
-    setShowExampleList(false);
-
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
     abortControllerRef.current = new AbortController();
 
-    //domain에 따라 다른 api 보내도록 바꿔보기
-    //null -> query, open -> open, close -> closed
+    // 새 질문이 추가될 때 loadingIndex 설정
+    setLoadingIndex(questionList.length);  // 새로운 질문의 인덱스
+    
     try {
       let result;
     
@@ -278,17 +287,21 @@ function HomeContent() {
         onNewChat={handleNewChat}
       />
 
-      {showExampleList ? (
-        <ExampleList onExampleClick={handleExampleClick} />
-      ) : (
-        <ChatList 
-          questionList={questionList} 
-          onRetry={handleRetry}
-          isLoading={isPendingQuery}  // isLoading은 mutation의 isPending 상태로 변경
-          //isLoading={loadingIndex !== null}
-          loadingIndex={loadingIndex}
-        />
-      )}
+      <div className="flex-1 overflow-y-auto">
+        {/* questionList가 비어있지 않으면 무조건 ChatList를 보여줌 */}
+        {questionList.length > 0 ? (
+          <ChatList 
+            questionList={questionList} 
+            onRetry={handleRetry}
+            isLoading={domain === 'close' ? isPendingClosed : 
+                      domain === 'open' ? isPendingOpen : 
+                      isPendingQuery}
+            loadingIndex={loadingIndex}
+          />
+        ) : showExampleList ? (
+          <ExampleList onExampleClick={handleExampleClick} />
+        ) : null}
+      </div>
 
       <div className="w-full max-w-4xl mx-auto px-4">
         <SearchBar 
@@ -296,7 +309,10 @@ function HomeContent() {
           handleSubmit={handleSubmit}
           domain={domain}
           setDomain={setDomain}
-          isLoading={isPendingQuery}
+          isLoading={domain === 'close' ? isPendingClosed : 
+                    domain === 'open' ? isPendingOpen : 
+                    isPendingQuery}
+          setLoading={setLoading}
           onAbort={handleAbort}
         />
       </div>
