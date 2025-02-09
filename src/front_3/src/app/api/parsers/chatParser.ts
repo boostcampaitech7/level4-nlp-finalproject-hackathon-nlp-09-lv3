@@ -18,6 +18,7 @@ export const parseClosedApiResponse = (
   console.log(pdfFileNames)
   console.log(audioFileNames)
   const [context, remainingText = ''] = answer.split('[생성된 이미지 이름]');
+  const refers = answer.split('[정보 출처]').pop()
 
   // 정규표현식으로 .png 파일명 추출
   const pngRegex = /-+\s*([\w\-\.]+\.png)/g;
@@ -61,7 +62,7 @@ export const parseClosedApiResponse = (
 
   return {
     question,
-    answer: context.trim() + '\n',
+    answer: context.trim() + '\n' + '\n' + '[정보출처]'  + refers,
     context: '',
     error: false,
     imageName,
