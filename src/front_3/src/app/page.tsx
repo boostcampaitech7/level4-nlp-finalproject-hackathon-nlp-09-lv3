@@ -84,8 +84,9 @@ function HomeContent() {
         ...newQuestion,
         answer: parsedResponse.answer,
         error: false,
-        imageName: parsedResponse.imageName, // 이미지 정보 추가
-        fileNames: parsedResponse.fileNames  // 출처 정보 추가
+        imageName: parsedResponse.imageName, // 이미지 정보
+        fileNames: parsedResponse.fileNames,  // PDF 정보
+        audioFileName: parsedResponse.audioFileName // TTS 오디오 파일 정보
       };
 
       const updatedList = questionList.length > 0 
