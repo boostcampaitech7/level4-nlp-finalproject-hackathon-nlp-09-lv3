@@ -26,7 +26,7 @@ function HomeContent() {
   
   const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const { mutate, isPending }  = useClosedQueryApi(); // mutation 객체 사용
+  const { mutate, isPending, mutateAsync }  = useClosedQueryApi(); // mutation 객체 사용
 
   const handleExampleClick = (example: string) => {
     const formData = new FormData();
@@ -74,7 +74,7 @@ function HomeContent() {
     //domain에 따라 다른 api 보내도록 바꿔보기
     //null -> query, open -> open, close -> closed
     try {
-      const result = await mutate(submittedQuestion); // mutate 호출하여 API 요청
+      const result = await mutateAsync(submittedQuestion); // mutate 호출하여 API 요청
       console.log("API 응답 결과:", result);
 
       // 🔹 API 응답을 parseClosedApiResponse로 변환

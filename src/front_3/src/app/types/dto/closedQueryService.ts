@@ -5,6 +5,6 @@ export interface ClosedQueryRequest {
 export interface ClosedQueryResponse {
   //context: string[];
   answer: string;
-  audioFileName : string;
+  audioFileNames : string;
   pdfFileNames : string[];
 }

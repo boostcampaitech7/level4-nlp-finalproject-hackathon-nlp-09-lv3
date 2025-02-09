@@ -4,4 +4,6 @@ export interface OpenQueryRequest {
 
 export interface OpenQueryResponse {
   answer: string;
+  audioFileNames : string;
+  pdfFileNames : string[];
 }

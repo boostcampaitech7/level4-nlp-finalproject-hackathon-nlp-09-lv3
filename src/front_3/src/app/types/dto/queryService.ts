@@ -4,6 +4,6 @@ export interface QueryRequest {
 
 export interface QueryResponse {
   answer: string;
-  //audioFileName : string;
-  //pdfFileNames : string[];
+  audioFileNames : string;
+  pdfFileNames : string[];
 }
