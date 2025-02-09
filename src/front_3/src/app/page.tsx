@@ -24,6 +24,7 @@ function HomeContent() {
   const [domain, setDomain] = useState<'open' | 'close' | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   
   const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -33,6 +34,7 @@ function HomeContent() {
   
 
   const handleExampleClick = (example: string) => {
+    setShowExampleList(false);  // 예시 질문 클릭 시에도 목록 숨김
     const formData = new FormData();
     formData.append('search', example);
     handleSubmit(formData);
@@ -43,15 +45,24 @@ function HomeContent() {
     
     if (!submittedQuestion?.trim()) return;
 
+    setShowExampleList(false);
+
+    // 입력 필드 초기화
+    if (searchBarRef.current) {
+      searchBarRef.current.setText('');
+    }
+
     const newQuestion = {
       question: submittedQuestion,
       answer: null,
     };
 
-    let newId: string | null = null;
-
+    // 새 질문을 한 번만 추가
+    const updatedQuestionList = [...questionList, newQuestion];
+    setQuestionList(updatedQuestionList);
+    
     if (!currentChatId) {
-      newId = Date.now().toString();
+      const newId = Date.now().toString();
       setCurrentChatId(newId);
       const newHistory: ChatHistory = {
         id: newId,
@@ -60,23 +71,12 @@ function HomeContent() {
         createdAt: new Date(),
       };
       setHistories(prev => [newHistory, ...prev]);
-      setQuestionList([newQuestion]);
     } else {
-      const updatedQuestionList = [...questionList, newQuestion];
-      setQuestionList(updatedQuestionList);
       updateCurrentChat(updatedQuestionList);
     }
-    
-    setShowExampleList(false);
 
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    setLoadingIndex(questionList.length);
 
-    abortControllerRef.current = new AbortController();
-
-    //domain에 따라 다른 api 보내도록 바꿔보기
-    //null -> query, open -> open, close -> closed
     try {
       let result;
     
@@ -104,48 +104,30 @@ function HomeContent() {
         fileNames: parsedResponse.fileNames,  // PDF 정보
         audioFileName: parsedResponse.audioFileName // TTS 오디오 파일 정보 // 출처 정보 추가
       };
-      const updatedList = questionList.length > 0 
-        ? [...questionList, updatedQuestion]
-        : [updatedQuestion];
 
-        setQuestionList(prev => [...prev, updatedQuestion]);
-        console.log("업데이트된 questionList:", [...questionList, updatedQuestion]);
-      
-      // 현재 대화 또는 새 대화 업데이트
+      // 마지막 질문만 업데이트
+      setQuestionList(prev => prev.map((q, i) => 
+        i === prev.length - 1 ? updatedQuestion : q
+      ));
+
       if (currentChatId) {
-        updateCurrentChat([...questionList, updatedQuestion]);
-      } else if (newId) {
-        setHistories(prev => prev.map(history => 
-          history.id === newId
-            ? { ...history, messages: updatedList }
-            : history
-        ));
+        const finalQuestionList = questionList.map((q, i) => 
+          i === questionList.length - 1 ? updatedQuestion : q
+        );
+        updateCurrentChat(finalQuestionList);
       }
+
     } catch (error) {
       console.error("API 요청 실패:", error);
-      
-      // 에러 상태 업데이트
       const errorQuestion = {
         ...newQuestion,
         error: true
       };
-
-      const updatedList = questionList.length > 0
-        ? [...questionList, errorQuestion]
-        : [errorQuestion];
-
-      setQuestionList(updatedList);
-      
-      // 현재 대화 또는 새 대화의 에러 상태 업데이트
-      if (currentChatId) {
-        updateCurrentChat(updatedList);
-      } else if (newId) {
-        setHistories(prev => prev.map(history =>
-          history.id === newId
-            ? { ...history, messages: updatedList }
-            : history
-        ));
-      }
+      setQuestionList(prev => prev.map((q, i) => 
+        i === prev.length - 1 ? errorQuestion : q
+      ));
+    } finally {
+      setLoadingIndex(null);
     }
   };
 
@@ -278,17 +260,21 @@ function HomeContent() {
         onNewChat={handleNewChat}
       />
 
-      {showExampleList ? (
-        <ExampleList onExampleClick={handleExampleClick} />
-      ) : (
-        <ChatList 
-          questionList={questionList} 
-          onRetry={handleRetry}
-          isLoading={isPendingQuery}  // isLoading은 mutation의 isPending 상태로 변경
-          //isLoading={loadingIndex !== null}
-          loadingIndex={loadingIndex}
-        />
-      )}
+      <div className="flex-1 overflow-y-auto">
+        {/* questionList가 비어있지 않으면 무조건 ChatList를 보여줌 */}
+        {questionList.length > 0 ? (
+          <ChatList 
+            questionList={questionList} 
+            onRetry={handleRetry}
+            isLoading={domain === 'close' ? isPendingClosed : 
+                      domain === 'open' ? isPendingOpen : 
+                      isPendingQuery}
+            loadingIndex={loadingIndex}
+          />
+        ) : showExampleList ? (
+          <ExampleList onExampleClick={handleExampleClick} />
+        ) : null}
+      </div>
 
       <div className="w-full max-w-4xl mx-auto px-4">
         <SearchBar 
@@ -296,7 +282,10 @@ function HomeContent() {
           handleSubmit={handleSubmit}
           domain={domain}
           setDomain={setDomain}
-          isLoading={isPendingQuery}
+          isLoading={domain === 'close' ? isPendingClosed : 
+                    domain === 'open' ? isPendingOpen : 
+                    isPendingQuery}
+          setLoading={setLoading}
           onAbort={handleAbort}
         />
       </div>
