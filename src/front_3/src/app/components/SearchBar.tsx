@@ -1,15 +1,16 @@
-import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react';
+import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 
 interface SearchBarProps {
   handleSubmit: (formData: FormData) => void;
   domain: 'open' | 'close' | null;
   setDomain: (domain: 'open' | 'close' | null) => void;
   isLoading: boolean;
+  setLoading: (loading: boolean) => void; // ✅ 추가됨
   onAbort: () => void;
 }
 
 const SearchBar = (
-  { handleSubmit, domain, setDomain, isLoading, onAbort }: SearchBarProps, 
+  { handleSubmit, domain, setDomain, isLoading, setLoading, onAbort }: SearchBarProps, 
   ref: React.ForwardedRef<{ setText: (text: string) => void }>
 ) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -35,6 +36,25 @@ const SearchBar = (
     // 입력값이 비어있거나 공백/줄바꿈만 있는지 확인
     setIsInputEmpty(!textarea.value.trim());
   };
+
+  //추가됨
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isInputEmpty && !isLoading) {
+      const formData = new FormData(e.currentTarget);
+      setLoading(true);
+      handleSubmit(formData);
+    }
+  };
+  /** ✅ domain 변경 시 자동으로 API 요청 */
+  useEffect(() => {
+    if (domain) {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('domain', domain);
+      handleSubmit(formData);
+    }
+  }, [domain, handleSubmit, setLoading]);
 
   return (
     <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[80%] max-w-3xl">

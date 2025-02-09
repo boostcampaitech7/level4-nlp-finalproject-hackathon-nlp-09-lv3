@@ -23,6 +23,7 @@ function HomeContent() {
   const [domain, setDomain] = useState<'open' | 'close' | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   
   const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -281,6 +282,7 @@ function HomeContent() {
           domain={domain}
           setDomain={setDomain}
           isLoading={isPending}
+          setLoading={setLoading}
           onAbort={handleAbort}
         />
       </div>
