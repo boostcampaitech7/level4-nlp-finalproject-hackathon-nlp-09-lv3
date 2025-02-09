@@ -45,6 +45,7 @@ function HomeContent() {
     
     if (!submittedQuestion?.trim()) return;
 
+
     // 예시 질문 목록을 강제로 숨김
     setShowExampleList(false);
 
@@ -58,13 +59,13 @@ function HomeContent() {
       answer: null,
     };
 
-    // 새 질문을 추가
-    setQuestionList(prev => [...prev, newQuestion]);
 
-    let newId: string | null = null;
+    // 새 질문을 한 번만 추가
+    const updatedQuestionList = [...questionList, newQuestion];
+    setQuestionList(updatedQuestionList);
 
     if (!currentChatId) {
-      newId = Date.now().toString();
+      const newId = Date.now().toString();
       setCurrentChatId(newId);
       const newHistory: ChatHistory = {
         id: newId,
@@ -74,18 +75,11 @@ function HomeContent() {
       };
       setHistories(prev => [newHistory, ...prev]);
     } else {
-      updateCurrentChat([...questionList, newQuestion]);
-    }
-    
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      updateCurrentChat(updatedQuestionList);
     }
 
-    abortControllerRef.current = new AbortController();
 
-    // 새 질문이 추가될 때 loadingIndex 설정
-    setLoadingIndex(questionList.length);  // 새로운 질문의 인덱스
-    
+    setLoadingIndex(questionList.length);
     try {
       let result;
     
@@ -113,48 +107,30 @@ function HomeContent() {
         fileNames: parsedResponse.fileNames,  // PDF 정보
         audioFileName: parsedResponse.audioFileName // TTS 오디오 파일 정보 // 출처 정보 추가
       };
-      const updatedList = questionList.length > 0 
-        ? [...questionList, updatedQuestion]
-        : [updatedQuestion];
 
-        setQuestionList(prev => [...prev, updatedQuestion]);
-        console.log("업데이트된 questionList:", [...questionList, updatedQuestion]);
-      
-      // 현재 대화 또는 새 대화 업데이트
+      // 마지막 질문만 업데이트
+      setQuestionList(prev => prev.map((q, i) => 
+        i === prev.length - 1 ? updatedQuestion : q
+      ));
+
       if (currentChatId) {
-        updateCurrentChat([...questionList, updatedQuestion]);
-      } else if (newId) {
-        setHistories(prev => prev.map(history => 
-          history.id === newId
-            ? { ...history, messages: updatedList }
-            : history
-        ));
+        const finalQuestionList = questionList.map((q, i) => 
+          i === questionList.length - 1 ? updatedQuestion : q
+        );
+        updateCurrentChat(finalQuestionList);
       }
+
     } catch (error) {
       console.error("API 요청 실패:", error);
-      
-      // 에러 상태 업데이트
       const errorQuestion = {
         ...newQuestion,
         error: true
       };
-
-      const updatedList = questionList.length > 0
-        ? [...questionList, errorQuestion]
-        : [errorQuestion];
-
-      setQuestionList(updatedList);
-      
-      // 현재 대화 또는 새 대화의 에러 상태 업데이트
-      if (currentChatId) {
-        updateCurrentChat(updatedList);
-      } else if (newId) {
-        setHistories(prev => prev.map(history =>
-          history.id === newId
-            ? { ...history, messages: updatedList }
-            : history
-        ));
-      }
+      setQuestionList(prev => prev.map((q, i) => 
+        i === prev.length - 1 ? errorQuestion : q
+      ));
+    } finally {
+      setLoadingIndex(null);
     }
   };
 

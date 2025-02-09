@@ -19,17 +19,23 @@ const SearchBar = (
   useImperativeHandle(ref, () => ({
     setText: (text: string) => {
       if (textareaRef.current) {
-        textareaRef.current.value = text;
+        textareaRef.current.value = '';
         textareaRef.current.style.height = "auto";
-        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-        setIsInputEmpty(!text.trim());
+        setIsInputEmpty(true);
       }
     }
   }));
 
+  const clearInput = () => {
+    if (textareaRef.current) {
+      textareaRef.current.value = '';
+      textareaRef.current.style.height = "auto";
+      setIsInputEmpty(true);
+    }
+  };
+
   const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
-    // 높이 자동 조절
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
     
@@ -37,28 +43,18 @@ const SearchBar = (
     setIsInputEmpty(!textarea.value.trim());
   };
 
-  //추가됨
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isInputEmpty && !isLoading) {
       const formData = new FormData(e.currentTarget);
-      setLoading(true);
       handleSubmit(formData);
+      clearInput();
     }
   };
-  /** ✅ domain 변경 시 자동으로 API 요청 */
-  useEffect(() => {
-    if (domain) {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append('domain', domain);
-      handleSubmit(formData);
-    }
-  }, [domain, handleSubmit, setLoading]);
 
   return (
     <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[80%] max-w-3xl">
-      <form action={handleSubmit}>
+      <form onSubmit={handleFormSubmit}>
         <div className="relative bg-[var(--example-box)] p-4 rounded-xl shadow-lg">
           <textarea
             ref={textareaRef}
@@ -72,7 +68,9 @@ const SearchBar = (
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 if (!isInputEmpty && !isLoading) {
-                  e.currentTarget.form?.requestSubmit();
+                  const formData = new FormData(e.currentTarget.form!);
+                  handleSubmit(formData);
+                  clearInput();
                 }
               }
             }}
