@@ -59,7 +59,7 @@ class Pipeline_For_Service:
         self.chat_count = 0
         self.file_names = []
         self.audio_route = None
-
+        self.reset_output()
 
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
             print('생성된 DB가 있어 로드합니다.')
@@ -99,6 +99,9 @@ class Pipeline_For_Service:
                 for agent in crew.agents:
                     agent.verbose = False
                     
+        output_dir = "./tts_result"
+        # 폴더가 없으면 생성
+        os.makedirs(output_dir, exist_ok=True)
         output_dir = "./output"
         # 폴더가 없으면 생성
         os.makedirs(output_dir, exist_ok=True)
@@ -146,6 +149,10 @@ class Pipeline_For_Service:
         output_dir = "./output"
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+        output_dir = "./tts_result"
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
         self.chat_count = 0
 
         os.makedirs(output_dir, exist_ok=True)
@@ -173,24 +180,27 @@ class Pipeline_For_Service:
         paragraph = False
         image = False
         table = False
-        inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : [], },
-                                    'images': {'image' : [], 'summary' : [], 'file_name' : []},
-                                    'tables': {'table': [], 'summary' : [], 'file_name': []}, }
+        inputs = {'query' : query, 'paragraphs': {'paragraph' : [], 'file_name' : [], 'page': []},
+                                    'images': {'image' : [], 'summary' : [], 'file_name' : [], 'page' :[]},
+                                    'tables': {'table': [], 'summary' : [], 'file_name': [], 'page': [] }}
         for i, doc in enumerate(retrieval_results):
             if doc.metadata['type'] == 'paragraph':
                 inputs['paragraphs']['paragraph'].append(doc.metadata['original_content'])
                 inputs['paragraphs']['file_name'].append(unicodedata.normalize("NFD",(doc.metadata['file_name'])))
+                inputs['paragraphs']['page'].append(unicodedata.normalize("NFD",doc.metadata['file_name']) + ' - '+ str(doc.metadata['page'])+'페이지')
                 paragraph = True
 
-            elif doc.metadata['type'] == 'figure':
+            elif doc.metadata['type'] == 'figure' or doc.metadata['type'] == 'chart' :
                 inputs['images']['file_name'].append(unicodedata.normalize("NFD", doc.metadata['file_name']))
                 inputs['images']['summary'].append(doc.page_content)
+                inputs['images']['page'].append(unicodedata.normalize("NFD",doc.metadata['file_name']) +' - '+ str(doc.metadata['page'])+'페이지')
                 image = True
 
             elif doc.metadata['type'] == 'table':
                 inputs['tables']['table'].append(doc.metadata['table'])
                 inputs['tables']['summary'].append(doc.page_content)
                 inputs['tables']['file_name'].append(unicodedata.normalize("NFD",doc.metadata['file_name']))
+                inputs['tables']['page'].append(unicodedata.normalize("NFD",doc.metadata['file_name']) +' - '+ str(doc.metadata['page'])+'페이지')
                 table = True
                 
             else:
@@ -199,19 +209,19 @@ class Pipeline_For_Service:
         final_result = await self.async_multiple_crews(
             paragraph=paragraph, image=image, table=table, inputs=inputs
         )
-        
+        file_names_plus_page = set(inputs['paragraphs']['page'] + inputs['images']['page'] + inputs['tables']['page'])
         file_names = set(inputs['paragraphs']['file_name'] + inputs['images']['file_name'] + inputs['tables']['file_name'])
-
-        final_result = final_result.raw + "\n\n[정보 출처] \n"
+        final_result = final_result.raw
+        output_dir = "./tts_result"
+        self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
+        final_result = final_result + "\n\n[정보 출처] \n"
         table_str = "\n".join(f"- {file}" 
-                            for idx, file in enumerate(file_names, start=1))
+                            for idx, file in enumerate(file_names_plus_page, start=1))
         
 
         final_result += table_str
         file_names = list(file_names)
         self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
-        output_dir = "./output"
-        
         for file in file_names:
             if os.path.exists(file):  # 파일이 존재하는지 확인
                 shutil.copy(file, output_dir)  # 파일 복사
@@ -219,7 +229,7 @@ class Pipeline_For_Service:
                 pass
 
         self.file_names = list(map(lambda x: unicodedata.normalize("NFD",'./modules/datas/pdfs/' + x), file_names))
-        self.audio_route = tts(final_result, save_dir = output_dir, cnt = self.chat_count)  
+        self.test = final_result
         self.chat_count += 1
 
 
@@ -229,9 +239,8 @@ class Pipeline_For_Service:
     def news_search_A(self, query):
         inputs = {'query': query}
         answer = self.news_crew.kickoff(inputs = inputs).raw
-        print(answer)
         self.file_names = []
-        output_dir = "./output"
+        output_dir = "./tts_result"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
         self.chat_count += 1
         return answer
@@ -263,9 +272,11 @@ class Pipeline_For_Service:
             if tool == '직접 답변':
                 answer = query_or_answer
                 file_name = []
-                audio_route = tts(answer)
+                output_dir = "./tts_result"
+                
                 self.chat_count += 1
                 chat_count = self.chat_count
+                audio_route = tts(answer, save_dir = output_dir, cnt = chat_count)
 
         return answer, file_name, audio_route, chat_count
 
