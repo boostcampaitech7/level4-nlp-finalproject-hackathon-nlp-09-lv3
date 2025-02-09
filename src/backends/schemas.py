@@ -14,3 +14,11 @@ class QueryServiceResponse(BaseModel):
     answer: str
     pdfFileNames: List[str]
     audioFileNames: str
+
+class Image(BaseModel):
+    id: int
+    url: str
+    title: str
+
+class ImagesResponse(BaseModel):
+    images: List[Image]

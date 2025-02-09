@@ -22,27 +22,21 @@ export const parseClosedApiResponse = (
 
   // 정규표현식으로 .png 파일명 추출
   const pngRegex = /-+\s*([\w\-\.]+\.png)/g;
-  const matches = [...remainingText.matchAll(pngRegex)];
+  const fallbackRegex = /\[생성된 이미지 이름\]\n\s*-\s*(?:output\/)?([\w\-\.]+\.png)/;
   
-  // 첫 번째 .png 파일을 선택
+  // 첫 번째 png 파일 찾기
+  const matches = [...remainingText.matchAll(pngRegex)];
   let imageName = matches.length > 0 ? `${IMAGE_BASE_URL}/${matches[0][1]}` : '';
   
-  // imageName이 비어있다면, 특정 형식도 파싱하여 처리
-  if (imageName===' ') {
-    const fallbackRegex = /\[생성된 이미지 이름\]\n\s*-\s*(output\/[\w\-\.]+\.png)/;
+  // imageName이 비어 있다면 fallback 처리
+  if (!imageName.trim()) {
     const fallbackMatch = remainingText.match(fallbackRegex);
     if (fallbackMatch) {
-      imageName = `${IMAGE_BASE_URL}/${fallbackMatch[0][1]}`;
-    }
-  }
-  if (imageName==='') {
-    const fallbackRegex = /\[생성된 이미지 이름\]\n\s*-\s*(output\/[\w\-\.]+\.png)/;
-    const fallbackMatch = remainingText.match(fallbackRegex);
-    if (fallbackMatch) {
-      imageName = `${IMAGE_BASE_URL}/${fallbackMatch[0][1]}`;
+      imageName = `${IMAGE_BASE_URL}/${fallbackMatch[1]}`;
     }
   }
   
+  console.log("추출된 imageName:", imageName);
   
   console.log('추출된 이미지 경로:', imageName);
   console.log('최종 imageName:', imageName); // 디버깅용
