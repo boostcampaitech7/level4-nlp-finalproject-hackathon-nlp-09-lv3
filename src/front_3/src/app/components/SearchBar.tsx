@@ -1,15 +1,16 @@
-import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react';
+import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 
 interface SearchBarProps {
   handleSubmit: (formData: FormData) => void;
   domain: 'open' | 'close' | null;
   setDomain: (domain: 'open' | 'close' | null) => void;
   isLoading: boolean;
+  setLoading: (loading: boolean) => void; // ✅ 추가됨
   onAbort: () => void;
 }
 
 const SearchBar = (
-  { handleSubmit, domain, setDomain, isLoading, onAbort }: SearchBarProps, 
+  { handleSubmit, domain, setDomain, isLoading, setLoading, onAbort }: SearchBarProps, 
   ref: React.ForwardedRef<{ setText: (text: string) => void }>
 ) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);

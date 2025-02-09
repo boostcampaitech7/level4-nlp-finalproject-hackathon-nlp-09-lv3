@@ -45,6 +45,8 @@ function HomeContent() {
     
     if (!submittedQuestion?.trim()) return;
 
+
+    // 예시 질문 목록을 강제로 숨김
     setShowExampleList(false);
 
     // 입력 필드 초기화
@@ -57,10 +59,11 @@ function HomeContent() {
       answer: null,
     };
 
+
     // 새 질문을 한 번만 추가
     const updatedQuestionList = [...questionList, newQuestion];
     setQuestionList(updatedQuestionList);
-    
+
     if (!currentChatId) {
       const newId = Date.now().toString();
       setCurrentChatId(newId);
@@ -75,8 +78,8 @@ function HomeContent() {
       updateCurrentChat(updatedQuestionList);
     }
 
-    setLoadingIndex(questionList.length);
 
+    setLoadingIndex(questionList.length);
     try {
       let result;
     
