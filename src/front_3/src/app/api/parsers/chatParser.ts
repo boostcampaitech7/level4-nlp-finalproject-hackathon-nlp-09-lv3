@@ -17,19 +17,38 @@ export const parseClosedApiResponse = (
   console.log(answer)
   console.log(pdfFileNames)
   console.log(audioFileNames)
-  // [생성된 이미지 이름] 을 기준으로 분리
   const [context, remainingText = ''] = answer.split('[생성된 이미지 이름]');
 
   // 정규표현식으로 .png 파일명 추출
-  const pngRegex = /-+\s*([\w\-\.]+\.png)/g; 
-  const matches = [...remainingText.matchAll(pngRegex)]; 
+  const pngRegex = /-+\s*([\w\-\.]+\.png)/g;
+  const matches = [...remainingText.matchAll(pngRegex)];
   
   // 첫 번째 .png 파일을 선택
-  const imageName = matches.length > 0 ? `${IMAGE_BASE_URL}/${matches[0][1]}` : ''; 
+  let imageName = matches.length > 0 ? `${IMAGE_BASE_URL}/${matches[0][1]}` : '';
+  
+  // imageName이 비어있다면, 특정 형식도 파싱하여 처리
+  if (imageName===' ') {
+    const fallbackRegex = /\[생성된 이미지 이름\]\n\s*-\s*(output\/[\w\-\.]+\.png)/;
+    const fallbackMatch = remainingText.match(fallbackRegex);
+    if (fallbackMatch) {
+      imageName = `${IMAGE_BASE_URL}/${fallbackMatch[0][1]}`;
+    }
+  }
+  if (imageName==='') {
+    const fallbackRegex = /\[생성된 이미지 이름\]\n\s*-\s*(output\/[\w\-\.]+\.png)/;
+    const fallbackMatch = remainingText.match(fallbackRegex);
+    if (fallbackMatch) {
+      imageName = `${IMAGE_BASE_URL}/${fallbackMatch[0][1]}`;
+    }
+  }
+  
   
   console.log('추출된 이미지 경로:', imageName);
   console.log('최종 imageName:', imageName); // 디버깅용
-  const fileNames = pdfFileNames.map(name => `${PDF_BASE_URL}/${name}`); // PDF 파일 변환
+  const fileNames = pdfFileNames.map(name => {
+    const fileName = name.split('/').pop(); // 경로에서 파일 이름만 추출
+    return `${PDF_BASE_URL}/${fileName}`; // PDF 파일 변환
+  });  console.log('pdf파일 경로:', fileNames)
   const audioFileName = audioFileNames.at(0) || ''; // 첫 번째 오디오 파일 선택
 
   let audioFileNameFinal = '';

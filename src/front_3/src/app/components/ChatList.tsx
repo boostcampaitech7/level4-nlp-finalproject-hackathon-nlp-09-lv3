@@ -176,6 +176,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                             참고 문서:
                           </p>
                           {qa.fileNames.map((fileUrl, idx) => {
+                            // URL을 디코딩하여 파일명을 추출
                             const fileName = decodeURIComponent(fileUrl.split('/').pop() || 'download.pdf');
                             return (
                               <a
