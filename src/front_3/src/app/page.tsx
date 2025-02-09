@@ -3,6 +3,7 @@
 import { useState, useRef, Dispatch, SetStateAction } from "react";
 import { useClosedQueryApi } from "./store/useClosedQueryApi";// API 훅 임포트
 import { useOpenQueryApi } from "./store/useOpenQueryApi";// API 훅 임포트
+import { useQueryApi } from "./store/useQueryApi";
 //import { closedQueryClient } from "./store/closedQueryClient";// API 훅 임포트
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ExampleList from "./components/ExampleList";
@@ -26,7 +27,10 @@ function HomeContent() {
   
   const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const { mutate, isPending, mutateAsync }  = useClosedQueryApi(); // mutation 객체 사용
+  const { mutate: mutateClosed, isPending: isPendingClosed, mutateAsync: mutateAsyncClosed } = useClosedQueryApi();
+  const { isPending: isPendingOpen, mutateAsync: mutateAsyncOpen } = useOpenQueryApi();
+  const { isPending: isPendingQuery, mutateAsync: mutateAsyncQuery } = useQueryApi();
+  
 
   const handleExampleClick = (example: string) => {
     const formData = new FormData();
@@ -74,12 +78,24 @@ function HomeContent() {
     //domain에 따라 다른 api 보내도록 바꿔보기
     //null -> query, open -> open, close -> closed
     try {
-      const result = await mutateAsync(submittedQuestion); // mutate 호출하여 API 요청
-      console.log("API 응답 결과:", result);
+      let result;
+    
+      // domain에 따라 다른 API를 호출
+      if (domain === null) {
+        result = await mutateAsyncQuery(submittedQuestion); // query API 호출
+        console.log("query API 응답 결과:", result);
+      } else if (domain === 'close') {
+        result = await mutateAsyncClosed(submittedQuestion); // closed API 호출
+        console.log("closed API 응답 결과:", result);
+      } else if (domain === 'open') {
+        result = await mutateAsyncOpen(submittedQuestion); // open API 호출
+        console.log("open API 응답 결과:", result);
+      }
 
       // 🔹 API 응답을 parseClosedApiResponse로 변환
       const parsedResponse = parseClosedApiResponse(result, submittedQuestion);
 
+      // 새로운 질문 객체 업데이트
       const updatedQuestion = {
         ...newQuestion,
         answer: parsedResponse.answer,
@@ -87,7 +103,6 @@ function HomeContent() {
         imageName: parsedResponse.imageName, // 이미지 정보 추가
         fileNames: parsedResponse.fileNames  // 출처 정보 추가
       };
-
       const updatedList = questionList.length > 0 
         ? [...questionList, updatedQuestion]
         : [updatedQuestion];
@@ -268,7 +283,7 @@ function HomeContent() {
         <ChatList 
           questionList={questionList} 
           onRetry={handleRetry}
-          isLoading={isPending}  // isLoading은 mutation의 isPending 상태로 변경
+          isLoading={isPendingQuery}  // isLoading은 mutation의 isPending 상태로 변경
           //isLoading={loadingIndex !== null}
           loadingIndex={loadingIndex}
         />
@@ -280,7 +295,7 @@ function HomeContent() {
           handleSubmit={handleSubmit}
           domain={domain}
           setDomain={setDomain}
-          isLoading={isPending}
+          isLoading={isPendingQuery}
           onAbort={handleAbort}
         />
       </div>

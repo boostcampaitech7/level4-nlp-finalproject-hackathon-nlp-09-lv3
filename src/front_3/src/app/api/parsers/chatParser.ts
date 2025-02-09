@@ -1,3 +1,4 @@
+import { routeModule } from 'next/dist/build/templates/pages';
 import type { ClosedQueryResponse } from '../../types/dto/closedQueryService'; 
 import type { QAndA } from '../../types/question';
 import { closedDomainApi } from '../chatApi';
