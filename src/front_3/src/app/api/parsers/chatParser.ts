@@ -27,7 +27,8 @@ export const parseClosedApiResponse = (
     .map(path => {
       console.log('처리 전 경로:', path); // 디버깅용
       const fileName = path.split('/').pop() || '';
-      const newPath = `/static/output/${fileName}`;
+      const parsedfileName = fileName.slice(2, fileName.length)
+      const newPath = `./static/output/${parsedfileName}`;
       console.log('처리 후 경로:', newPath); // 디버깅용
       return newPath;
     }).at(0) || '';  // 첫 번째 요소 가져옴, 없으면 빈 문자열

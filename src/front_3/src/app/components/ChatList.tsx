@@ -83,19 +83,16 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                     </div>
                   ) : (
                     <div className="bg-[var(--example-box)] rounded-lg p-4">
-                      <p className="text-[var(--foreground)]">{qa.answer}</p>
-                      {qa.imageName?.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                          {qa.imageName.map((imgUrl, idx) => (
+                      <pre className="text-[var(--foreground)] whitespace-pre-wrap">{qa.answer}</pre>
+                      {qa.imageName && (
+                          <div className="mt-2">
                             <img 
-                              key={idx}
-                              src={imgUrl}
-                              alt={`생성된 이미지 ${idx + 1}`}
+                              src={qa.imageName}
+                              alt="생성된 이미지"
                               className="w-full rounded-lg shadow-md"
                             />
-                          ))}
-                        </div>
-                      )}
+                          </div>
+                        )}
                       {qa.fileNames?.length > 0 && (
                         <div className="mt-4 space-y-2">
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
