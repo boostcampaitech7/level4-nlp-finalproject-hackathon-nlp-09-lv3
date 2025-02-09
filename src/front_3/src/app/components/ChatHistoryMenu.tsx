@@ -87,7 +87,7 @@ export default function ChatHistoryMenu({
                   : 'text-[var(--foreground)]'
               }`}
             >
-              저장된 이미지
+              이미지 모아보기
             </button>
           </div>
 
@@ -164,7 +164,7 @@ export default function ChatHistoryMenu({
           ) : (
             // 저장된 이미지 탭 내용
             <div className="text-center text-[var(--foreground)] py-4">
-              저장된 이미지가 없습니다.
+              이미지가 없습니다.
             </div>
           )}
         </div>

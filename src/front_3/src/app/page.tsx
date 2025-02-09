@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useMutateQueryApi } from "./store/useClosedQueryApi";// API 훅 임포트
+import { useState, useRef, Dispatch, SetStateAction } from "react";
+import { useClosedQueryApi } from "./store/useClosedQueryApi";// API 훅 임포트
+import { useOpenQueryApi } from "./store/useOpenQueryApi";// API 훅 임포트
+//import { closedQueryClient } from "./store/closedQueryClient";// API 훅 임포트
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ExampleList from "./components/ExampleList";
 import SearchBar from "./components/SearchBar";
@@ -9,9 +11,10 @@ import ChatList from "./components/ChatList";
 import ThemeToggle from "./components/ThemeToggle";
 import ChatHistoryMenu from './components/ChatHistoryMenu';
 import type { ChatHistory } from './types/chatHistory';
+import { parseClosedApiResponse } from './api/parsers/chatParser';
 import type { QAndA } from "./types/question";
 
-const queryClient = new QueryClient();
+export const closedQueryClient = new QueryClient();
 
 function HomeContent() {
   const [questionList, setQuestionList] = useState<QAndA[]>([]);
@@ -23,7 +26,7 @@ function HomeContent() {
   
   const searchBarRef = useRef<{ setText: (text: string) => void } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutateQueryApi();
+  const { mutate, isPending, mutateAsync }  = useClosedQueryApi(); // mutation 객체 사용
 
   const handleExampleClick = (example: string) => {
     const formData = new FormData();
@@ -33,6 +36,7 @@ function HomeContent() {
 
   const handleSubmit = async (formData: FormData) => {
     const submittedQuestion = formData.get("search") as string;
+    
     if (!submittedQuestion?.trim()) return;
 
     const newQuestion = {
@@ -67,14 +71,33 @@ function HomeContent() {
 
     abortControllerRef.current = new AbortController();
 
+    //domain에 따라 다른 api 보내도록 바꿔보기
+    //null -> query, open -> open, close -> closed
     try {
-      const result = await mutation.mutateAsync({ query: submittedQuestion });
+      const result = await mutateAsync(submittedQuestion); // mutate 호출하여 API 요청
+      console.log("API 응답 결과:", result);
+
+      // 🔹 API 응답을 parseClosedApiResponse로 변환
+      const parsedResponse = parseClosedApiResponse(result, submittedQuestion);
+
+      const updatedQuestion = {
+        ...newQuestion,
+        answer: parsedResponse.answer,
+        error: false,
+        imageName: parsedResponse.imageName, // 이미지 정보 추가
+        fileNames: parsedResponse.fileNames  // 출처 정보 추가
+      };
+
+      const updatedList = questionList.length > 0 
+        ? [...questionList, updatedQuestion]
+        : [updatedQuestion];
+
+        setQuestionList(prev => [...prev, updatedQuestion]);
+        console.log("업데이트된 questionList:", [...questionList, updatedQuestion]);
       
-      const updatedList = [...questionList, { ...newQuestion, answer: result.answer, context: result.context }];
-      setQuestionList(updatedList);
-      
+      // 현재 대화 또는 새 대화 업데이트
       if (currentChatId) {
-        updateCurrentChat(updatedList);
+        updateCurrentChat([...questionList, updatedQuestion]);
       } else if (newId) {
         setHistories(prev => prev.map(history => 
           history.id === newId
@@ -84,9 +107,20 @@ function HomeContent() {
       }
     } catch (error) {
       console.error("API 요청 실패:", error);
-      const updatedList = [...questionList, { ...newQuestion, error: true }];
+      
+      // 에러 상태 업데이트
+      const errorQuestion = {
+        ...newQuestion,
+        error: true
+      };
+
+      const updatedList = questionList.length > 0
+        ? [...questionList, errorQuestion]
+        : [errorQuestion];
+
       setQuestionList(updatedList);
       
+      // 현재 대화 또는 새 대화의 에러 상태 업데이트
       if (currentChatId) {
         updateCurrentChat(updatedList);
       } else if (newId) {
@@ -168,42 +202,44 @@ function HomeContent() {
   //재시도 로직
   const handleRetry = async (index: number) => {
     const question = questionList[index].question;
-    if (!question) return;
+    // if (!question) return;
     
-    setLoadingIndex(index);
+    // setLoadingIndex(index);
 
-    try {
-      const result = await mutation.mutateAsync({ query: question });
+    // try {
+    //   const result = await mutation.mutateAsync({ query: question });
       
-      const updatedList = questionList.map((qa, i) => 
-        i === index 
-          ? { 
-              ...qa, 
-              answer: result.answer, 
-              context: result.context,
-              error: false 
-            } 
-          : qa
-      );
+    //   const updatedList = questionList.map((qa, i) => 
+    //     i === index 
+    //       ? { 
+    //           ...qa, 
+    //           answer: result.answer, 
+    //           context: result.context,
+    //           imageNames: result.imageNames,
+    //           fileNames: result.filenames,
+    //           error: false 
+    //         } 
+    //       : qa
+    //   );
       
-      setQuestionList(updatedList);
-      if (currentChatId) {
-        updateCurrentChat(updatedList);
-      }
-    } catch (error) {
-      console.error("API 요청 실패:", error);
-      const updatedList = questionList.map((qa, i) => 
-        i === index 
-          ? { ...qa, error: true } 
-          : qa
-      );
-      setQuestionList(updatedList);
-      if (currentChatId) {
-        updateCurrentChat(updatedList);
-      }
-    } finally {
-      setLoadingIndex(null);
-    }
+    //   setQuestionList(updatedList);
+    //   if (currentChatId) {
+    //     updateCurrentChat(updatedList);
+    //   }
+    // } catch (error) {
+    //   console.error("API 요청 실패:", error);
+    //   const updatedList = questionList.map((qa, i) => 
+    //     i === index 
+    //       ? { ...qa, error: true } 
+    //       : qa
+    //   );
+    //   setQuestionList(updatedList);
+    //   if (currentChatId) {
+    //     updateCurrentChat(updatedList);
+    //   }
+    // } finally {
+    //   setLoadingIndex(null);
+    // }
   };
 
   // 대화 삭제 핸들러
@@ -232,7 +268,8 @@ function HomeContent() {
         <ChatList 
           questionList={questionList} 
           onRetry={handleRetry}
-          isLoading={loadingIndex !== null}
+          isLoading={isPending}  // isLoading은 mutation의 isPending 상태로 변경
+          //isLoading={loadingIndex !== null}
           loadingIndex={loadingIndex}
         />
       )}
@@ -243,7 +280,7 @@ function HomeContent() {
           handleSubmit={handleSubmit}
           domain={domain}
           setDomain={setDomain}
-          isLoading={mutation.isPending}
+          isLoading={isPending}
           onAbort={handleAbort}
         />
       </div>
@@ -253,7 +290,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={closedQueryClient}>
       <HomeContent />
     </QueryClientProvider>
   );
