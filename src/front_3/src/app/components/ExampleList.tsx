@@ -70,13 +70,13 @@ const ExampleList: React.FC<ExampleListProps> = ({ onExampleClick }) => {
   ];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center">
+    <div className="w-full max-w-4xl px-4">
       <div className="mb-12 text-center">
         <h1 className="text-4xl font-bold mb-4 text-[var(--foreground)]">FinBuddy</h1>
         <img 
-          src="https://img.icons8.com/pastel-glyph/64/1A1919/dog-jump--v1.png"
+          src="/kong.png"
           alt="FinBuddy Logo"
-          className="w-16 h-16 mx-auto dark:invert"
+          className="w-16 h-16 mx-auto"
         />
       </div>
       <div className="grid grid-cols-2 gap-4 max-w-4xl w-full px-4">

@@ -53,7 +53,7 @@ const SearchBar = (
   };
 
   return (
-    <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[80%] max-w-3xl">
+    <div className="fixed bottom-12 left-1/2 transform -translate-x-1/2 w-[90%] max-w-4xl">
       <form onSubmit={handleFormSubmit}>
         <div className="relative bg-[var(--example-box)] p-4 rounded-xl shadow-lg">
           <textarea

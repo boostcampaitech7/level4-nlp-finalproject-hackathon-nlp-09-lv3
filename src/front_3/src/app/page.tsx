@@ -264,8 +264,7 @@ function HomeContent() {
         onNewChat={handleNewChat}
       />
 
-      <div className="flex-1 overflow-y-auto">
-        {/* questionList가 비어있지 않으면 무조건 ChatList를 보여줌 */}
+      <div className="flex-1 flex flex-col overflow-y-auto">
         {questionList.length > 0 ? (
           <ChatList 
             questionList={questionList} 
@@ -276,7 +275,9 @@ function HomeContent() {
             loadingIndex={loadingIndex}
           />
         ) : showExampleList ? (
-          <ExampleList onExampleClick={handleExampleClick} />
+          <div className="flex-1 flex items-center justify-center">
+            <ExampleList onExampleClick={handleExampleClick} />
+          </div>
         ) : null}
       </div>
 
