@@ -21,7 +21,7 @@ export default function ChatHistoryMenu({
   onNewChat 
 }: ChatHistoryMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'chat' | 'images'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'images'| ''>('chat');
 
     // 이미지 목록과 로딩 상태를 위한 state 추가
     const [images, setImages] = useState<Image[]>([]);
@@ -31,7 +31,7 @@ export default function ChatHistoryMenu({
     useEffect(() => {
       if (activeTab === 'images') {
         setLoadingImages(true);
-        fetch('http://localhost:8000/api/for_service/getImages_folder')
+        fetch('http://localhost:8000/api/for_service/getImages')
           .then(res => res.json())
           .then((data) => {
             // data.images가 undefined면 빈 배열([])로 대체
@@ -43,7 +43,7 @@ export default function ChatHistoryMenu({
             setLoadingImages(false);
           });
       }
-    }, [activeTab]);
+    }, [activeTab, ]);
 
   return (
     <div className="fixed top-4 left-4 z-50">
@@ -108,16 +108,33 @@ export default function ChatHistoryMenu({
               대화내역
             </button>
             <button
-              onClick={() => setActiveTab('images')}
-              className={`flex-1 py-2 text-sm font-medium ${
-                activeTab === 'images'
-                  ? 'text-blue-500 border-b-2 border-blue-500'
-                  : 'text-[var(--foreground)]'
-              }`}
-            >
-              이미지 모아보기
-            </button>
-          </div>
+                  onClick={() => setActiveTab('images')}
+                  className={`flex-1 py-2 text-sm font-medium ${
+                    activeTab === 'images'
+                      ? 'text-blue-500 border-b-2 border-blue-500'
+                      : 'text-[var(--foreground)]'
+                  }`}
+                >
+                  이미지 모아보기
+                </button>
+              </div>
+
+              {activeTab === 'images' && (
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => {
+                      // activeTab을 빈 값으로 설정 후 잠시 후에 'images'로 다시 설정
+                      setActiveTab('');
+                      setTimeout(() => {
+                        setActiveTab('images');
+                      }, 100); // 100ms 정도 지연 후 'images'로 설정
+                    }}
+                    className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-300 rounded-md hover:bg-gray-400"
+                  >
+                    🔄
+                  </button>
+                </div>
+                )}
 
           {activeTab === 'chat' ? (
             <>

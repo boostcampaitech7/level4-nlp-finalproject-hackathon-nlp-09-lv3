@@ -30,11 +30,7 @@ export const parseClosedApiResponse = (
   }
   const imageName = `${IMAGE_BASE_URL}/${visualized_name}`
 
-  
-  console.log("추출된 imageName:", imageName);
-  
-  console.log('추출된 이미지 경로:', imageName);
-  console.log('최종 imageName:', imageName); // 디버깅용
+  console.log(visualized_name)
   const fileNames = pdfFileNames.map(name => {
     const fileName = name.split('/').pop(); // 경로에서 파일 이름만 추출
     return `${PDF_BASE_URL}/${fileName}`; // PDF 파일 변환
