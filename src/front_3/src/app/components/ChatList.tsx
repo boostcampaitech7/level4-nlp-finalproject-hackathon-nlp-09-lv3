@@ -76,7 +76,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
   
 
   return (
-    <div className="flex-1 overflow-y-auto pt-4 pb-32">
+    <div className="flex-1 overflow-y-auto pt-4 pb-44">
       <div className="max-w-4xl mx-auto px-4 mt-0">
         {questionList.map((qa, index) => (
           <div key={index} className="mb-8">
@@ -142,7 +142,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                       </button>
                     </div>
                   ) : (
-                    <div className="bg-[var(--background)] rounded-lg p-4 border border-[var(--primary)]">
+                    <div className="bg-[var(--background)] rounded-lg p-4 border border-[#9ae942]">
                       <pre className="text-[var(--foreground)] whitespace-pre-wrap">{qa.answer}</pre>
                       {qa.imageName && (
                           <div className="mt-2">
@@ -202,7 +202,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                               alt="Play Audio" 
                               className="w-6 h-6"
                             />
-                            <span className="text-sm text-gray-700">Play Audio</span>
+                            {/* <span className="text-sm text-gray-700">Play Audio</span> */}
                           </button>
                         </div>
                       )}
