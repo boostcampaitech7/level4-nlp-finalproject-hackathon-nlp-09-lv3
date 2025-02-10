@@ -76,8 +76,8 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
   
 
   return (
-    <div className="flex-1 overflow-y-auto pt-8 pb-32">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="flex-1 overflow-y-auto pt-4 pb-32">
+      <div className="max-w-4xl mx-auto px-4 mt-0">
         {questionList.map((qa, index) => (
           <div key={index} className="mb-8">
             {/* 사용자 질문 */}
@@ -110,19 +110,19 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
               <div className="flex items-start gap-3 pr-11">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
                   <img 
-                    src="https://img.icons8.com/pastel-glyph/64/1A1919/dog-jump--v1.png"
+                    src="/happykong.png"
                     alt="AI Assistant"
-                    className="w-full h-full object-cover dark:invert"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex-1">
                   {isLoading && loadingIndex === index ? (
-                    <div className="bg-[var(--example-box)] rounded-lg p-4">
+                    <div className="bg-[var(--background)] rounded-lg p-4 border border-[var(--primary)]">
                       <div className="flex items-center gap-2">
                         {[0, 200, 400].map((delay) => (
                           <div
                             key={delay}
-                            className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                            className="w-2 h-2 bg-[var(--primary)] rounded-full animate-bounce"
                             style={{ animationDelay: `${delay}ms` }}
                           />
                         ))}
@@ -142,7 +142,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                       </button>
                     </div>
                   ) : (
-                    <div className="bg-[var(--example-box)] rounded-lg p-4">
+                    <div className="bg-[var(--background)] rounded-lg p-4 border border-[var(--primary)]">
                       <pre className="text-[var(--foreground)] whitespace-pre-wrap">{qa.answer}</pre>
                       {qa.imageName && (
                           <div className="mt-2">
@@ -213,8 +213,8 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
             )}
           </div>
         ))}
+        <div ref={chatEndRef} />
       </div>
-      <div ref={chatEndRef} />
     </div>
   );
 };
