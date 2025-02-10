@@ -1,5 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ChatHistory } from '../types/chatHistory';
+
+interface Image {
+  id: number;
+  url: string;
+  title: string;
+}
 
 interface ChatHistoryMenuProps {
   histories: ChatHistory[];
@@ -16,6 +22,28 @@ export default function ChatHistoryMenu({
 }: ChatHistoryMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'images'>('chat');
+
+    // 이미지 목록과 로딩 상태를 위한 state 추가
+    const [images, setImages] = useState<Image[]>([]);
+    const [loadingImages, setLoadingImages] = useState(false);
+  
+    // activeTab이 images로 변경될 때 API 호출
+    useEffect(() => {
+      if (activeTab === 'images') {
+        setLoadingImages(true);
+        fetch('http://localhost:8000/api/for_service/getImages_folder')
+          .then(res => res.json())
+          .then((data) => {
+            // data.images가 undefined면 빈 배열([])로 대체
+            setImages(data.images ?? []);
+            setLoadingImages(false);
+          })
+          .catch(err => {
+            console.error(err);
+            setLoadingImages(false);
+          });
+      }
+    }, [activeTab]);
 
   return (
     <div className="fixed top-4 left-4 z-50">
@@ -162,9 +190,24 @@ export default function ChatHistoryMenu({
               </div>
             </>
           ) : (
-            // 저장된 이미지 탭 내용
-            <div className="text-center text-[var(--foreground)] py-4">
-              이미지가 없습니다.
+            // 이미지 탭 내용
+            <div className="py-4">
+              {loadingImages ? (
+                <p className="text-center text-[var(--foreground)]">이미지 로딩 중...</p>
+              ) : images.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {images.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img.url}
+                      alt={img.title}
+                      className="object-cover w-full h-auto rounded-lg"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-[var(--foreground)]">이미지가 없습니다.</p>
+              )}
             </div>
           )}
         </div>
