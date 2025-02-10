@@ -7,7 +7,13 @@ const PDF_BASE_URL = '/static/pdfs';
 const TTS_BASE_URL = '/static/tts_result';
 
 
-
+function makeLinksClickable(text) {
+  const urlRegex = /(https?:\/\/[^\s)]+)/g;  // 닫는 괄호 ')' 제외
+  return text.replace(
+    urlRegex,
+    '<a href="$1" target="_blank" class="text-blue-500 underline">$1</a>'
+  );
+}
 
 export const parseClosedApiResponse = (
   response: ClosedQueryResponse, 
@@ -18,8 +24,10 @@ export const parseClosedApiResponse = (
   console.log(pdfFileNames)
   console.log(audioFileNames)
   const [context, remainingText = ''] = answer.split('[생성된 이미지 이름]');
-  const refers = answer.split('[정보 출처]').pop()
-
+  let refers = answer.split('[정보 출처]').pop();
+  if (context === refers) {
+    refers = ''; // 값 변경 가능
+  }
   const imageName = `${IMAGE_BASE_URL}/${visualized_name}`
 
   
@@ -40,16 +48,26 @@ export const parseClosedApiResponse = (
     const firstAudio = audioFileNames[0] as string;
     audioFileNameFinal = `${TTS_BASE_URL}/${firstAudio.split('/').pop()}`;
   }
+  let final_answer;
+  if (refers === '') {
+    final_answer = context.trim() + '\n\n' + refers;
+  } else {
+    final_answer = context.trim() + '\n\n' + '[정보출처] ' + refers;
+  }
+  final_answer = makeLinksClickable(final_answer)
 
+  // JSX로 렌더링하기 위해 dangerouslySetInnerHTML 사용
   return {
     question,
-    answer: context.trim() + '\n' + '\n' + '[정보출처]'  + refers,
+    answer: (
+      <div dangerouslySetInnerHTML={{ __html: final_answer }} />
+    ),
     context: '',
     error: false,
     imageName,
     fileNames,
     audioFileName: audioFileNameFinal
-};
+  };
 };
 // // 뭔가 처리가 좀 복잡하게 하는것 같아서 좀더 간편하게 정규표현식으로 자르도록 수정
 // import type { ClosedQueryResponse } from '../../types/dto/closedQueryService'; 

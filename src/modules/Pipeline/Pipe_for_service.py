@@ -59,7 +59,7 @@ class Pipeline_For_Service:
         self.chat_count = 0
         self.file_names = []
         self.audio_route = None
-        self.visualized_name = ''
+        self.visualized_name = 'not.png'
         self.reset_output()
 
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
@@ -141,7 +141,7 @@ class Pipeline_For_Service:
                     print(f"Error processing table, retrying: {e}")
                 table_result = self.table_crew.kickoff(inputs=inputs)
         if not table:
-            self.visualized_name = ''
+            self.visualized_name = 'not.png'
         
         final_inputs = {"context_result": context_result.raw if context_result != '' else context_result,
                          "image_result": image_result.raw if image_result != '' else image_result,
@@ -150,16 +150,28 @@ class Pipeline_For_Service:
         return final_result
 
     def reset_output(self):
-        output_dir = "./output"
-        if os.path.exists(output_dir):
-            shutil.rmtree(output_dir)
-        os.makedirs(output_dir, exist_ok=True)
-        output_dir = "./tts_result"
-        if os.path.exists(output_dir):
-            shutil.rmtree(output_dir)
-        self.chat_count = 0
+        # 삭제할 디렉터리 목록
+        output_dirs = ["./output", "./tts_result"]
+        
+        for output_dir in output_dirs:
+            if os.path.exists(output_dir):
+                # 폴더 내부의 파일을 개별적으로 삭제
+                for file_name in os.listdir(output_dir):
+                    file_path = os.path.join(output_dir, file_name)
+                    
+                    # 'not.png' 파일은 삭제하지 않음
+                    if file_name == "not.png":
+                        continue
+                    
+                    # 파일 또는 폴더 삭제
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.remove(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+            else:
+                os.makedirs(output_dir, exist_ok=True)
 
-        os.makedirs(output_dir, exist_ok=True)
+        self.chat_count = 0
 
     def Q(self, query: str, mode = 'ensemble'):
         if mode == 'ensemble':
@@ -246,7 +258,7 @@ class Pipeline_For_Service:
         self.file_names = []
         output_dir = "./tts_result"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
-        self.visualized_name = ''
+        self.visualized_name = 'not.png'
         self.chat_count += 1
         return answer
     
@@ -280,7 +292,7 @@ class Pipeline_For_Service:
                 answer = query_or_answer
                 file_name = []
                 output_dir = "./tts_result"
-                visualized_name = ''
+                visualized_name = 'not.png'
                 self.chat_count += 1
                 chat_count = self.chat_count
                 audio_route = tts(answer, save_dir = output_dir, cnt = chat_count)
