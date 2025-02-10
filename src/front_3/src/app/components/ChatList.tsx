@@ -117,7 +117,7 @@ const ChatList = ({ questionList, onRetry, isLoading, loadingIndex }: ChatListPr
                 </div>
                 <div className="flex-1">
                   {isLoading && loadingIndex === index ? (
-                    <div className="bg-[var(--background)] rounded-lg p-4 border border-[var(--primary)]">
+                    <div className="bg-[var(--background)] rounded-lg p-4 border border-[#9ae942]">
                       <div className="flex items-center gap-2">
                         {[0, 200, 400].map((delay) => (
                           <div
