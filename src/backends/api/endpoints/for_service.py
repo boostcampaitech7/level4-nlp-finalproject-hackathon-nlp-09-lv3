@@ -57,7 +57,8 @@ async def get_images():
     for i, file in enumerate(file_names):
         # 파일명에서 확장자 제외한 제목 추출
         title = file.split('/')[-1]
-        
+        if title == 'not.png':
+            continue
         # 이미지 정보 생성
         image = Image(
             id=i, 
