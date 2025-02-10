@@ -131,7 +131,7 @@ export default function ChatHistoryMenu({
                     }}
                     className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-300 rounded-md hover:bg-gray-400"
                   >
-                    🔄
+                    새로고침
                   </button>
                 </div>
                 )}
