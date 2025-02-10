@@ -48,7 +48,7 @@ class Pipeline_For_Eval:
         search_type = 'mmr'
         self.ensemble_retriever = ensemble(retrievals, topk = topk, weights = weights, search_type = search_type)
 
-    def setup(self, model = 'GPT'):
+    def setup(self, model = 'Exaone'):
             if model == 'GPT':
                 self.model = GPTModel()
             elif model == 'Qwen14B':
