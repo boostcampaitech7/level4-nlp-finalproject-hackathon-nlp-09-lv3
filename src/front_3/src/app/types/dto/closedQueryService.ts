@@ -7,4 +7,5 @@ export interface ClosedQueryResponse {
   answer: string;
   audioFileNames : string;
   pdfFileNames : string[];
+  visualized_name : string;
 }

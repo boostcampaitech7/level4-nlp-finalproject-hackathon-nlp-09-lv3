@@ -5,6 +5,11 @@ from pydantic import BaseModel
 class Codeoutput(BaseModel):
     description: str
     code: str
+
+class Routeoutput(BaseModel):
+    description: str
+    name: str
+
 @CrewBase
 class TableCrew:
     agents_config = 'config/table_agents.yaml' 
@@ -57,7 +62,8 @@ class TableCrew:
     @task
     def answer_task(self) -> Task:
         return Task(
-            config = self.tasks_config['table_answer_task']
+            config = self.tasks_config['table_answer_task'],
+            output_pydantic=Routeoutput
         )
 
     @crew

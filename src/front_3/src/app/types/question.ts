@@ -12,4 +12,5 @@ export interface QAndA {
     imageName: string;
     fileNames: string[];
     audioFileName : string;
+    visualized_name: string;
   }

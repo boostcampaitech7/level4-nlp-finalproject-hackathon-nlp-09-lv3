@@ -13,28 +13,15 @@ export const parseClosedApiResponse = (
   response: ClosedQueryResponse, 
   question: string
 ): QAndA => {
-  const { answer, pdfFileNames, audioFileNames } = response; // 추가된 필드 반영
+  const { answer, pdfFileNames, audioFileNames, visualized_name } = response; // 추가된 필드 반영
   console.log(answer)
   console.log(pdfFileNames)
   console.log(audioFileNames)
   const [context, remainingText = ''] = answer.split('[생성된 이미지 이름]');
   const refers = answer.split('[정보 출처]').pop()
 
-  // 정규표현식으로 .png 파일명 추출
-  const pngRegex = /-+\s*([\w\-\.]+\.png)/g;
-  const fallbackRegex = /\[생성된 이미지 이름\]\n\s*-\s*(?:output\/)?([\w\-\.]+\.png)/;
-  
-  // 첫 번째 png 파일 찾기
-  const matches = [...remainingText.matchAll(pngRegex)];
-  let imageName = matches.length > 0 ? `${IMAGE_BASE_URL}/${matches[0][1]}` : '';
-  
-  // imageName이 비어 있다면 fallback 처리
-  if (!imageName.trim()) {
-    const fallbackMatch = remainingText.match(fallbackRegex);
-    if (fallbackMatch) {
-      imageName = `${IMAGE_BASE_URL}/${fallbackMatch[1]}`;
-    }
-  }
+  const imageName = `${IMAGE_BASE_URL}/${visualized_name}`
+
   
   console.log("추출된 imageName:", imageName);
   

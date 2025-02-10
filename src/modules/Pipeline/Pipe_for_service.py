@@ -59,6 +59,7 @@ class Pipeline_For_Service:
         self.chat_count = 0
         self.file_names = []
         self.audio_route = None
+        self.visualized_name = ''
         self.reset_output()
 
         if os.path.isdir(os.path.join(persist_directory, folder_name)):
@@ -129,6 +130,7 @@ class Pipeline_For_Service:
         while table:
             try:
                 visualize_code = json.loads(table_result.tasks_output[-2].raw)['code']
+                self.visualized_name = json.loads(table_result.tasks_output[-1].raw)['name']
                 table_result = table_result.raw
                 if self.verbose:
                     print(visualize_code)
@@ -138,6 +140,8 @@ class Pipeline_For_Service:
                 if self.verbose:
                     print(f"Error processing table, retrying: {e}")
                 table_result = self.table_crew.kickoff(inputs=inputs)
+        if not table:
+            self.visualized_name = ''
         
         final_inputs = {"context_result": context_result.raw if context_result != '' else context_result,
                          "image_result": image_result.raw if image_result != '' else image_result,
@@ -233,7 +237,7 @@ class Pipeline_For_Service:
         self.chat_count += 1
 
 
-        return final_result, self.file_names, self.audio_route, self.chat_count
+        return final_result, self.file_names, self.audio_route, self.chat_count, self.visualized_name
 
 
     def news_search_A(self, query):
@@ -242,6 +246,7 @@ class Pipeline_For_Service:
         self.file_names = []
         output_dir = "./tts_result"
         self.audio_route = tts(answer, save_dir = output_dir, cnt = self.chat_count)
+        self.visualized_name = ''
         self.chat_count += 1
         return answer
     
@@ -252,32 +257,34 @@ class Pipeline_For_Service:
         query_or_answer = response.final_answer
         if search_type == 'closed_domain':
             retrieval_results = self.Q(query, mode = mode)
-            answer, file_name, audio_route, chat_count = await self.A(query, retrieval_results,)
+            answer, file_name, audio_route, chat_count, visualized_name = await self.A(query, retrieval_results,)
         elif search_type == 'open_domain':
             answer = self.news_search_A(query_or_answer)
             file_name = self.file_names
             audio_route = self.audio_route
             chat_count = self.chat_count
+            visualized_name = self.visualized_name
         else:
             if response.tool == '최신 뉴스기사 검색':
                 answer = self.news_search_A(query_or_answer)
                 file_name = self.file_names
                 audio_route = self.audio_route
                 chat_count = self.chat_count
+                visualized_name = self.visualized_name
 
             if tool == '내부 주식 리포트 RAG':
                 retrieval_results = self.Q(query, mode = mode)
-                answer, file_name, audio_route, chat_count = await self.A(query, retrieval_results,)
-            
+                answer, file_name, audio_route, chat_count, visualized_name = await self.A(query, retrieval_results,)
+
             if tool == '직접 답변':
                 answer = query_or_answer
                 file_name = []
                 output_dir = "./tts_result"
-                
+                visualized_name = ''
                 self.chat_count += 1
                 chat_count = self.chat_count
                 audio_route = tts(answer, save_dir = output_dir, cnt = chat_count)
 
-        return answer, file_name, audio_route, chat_count
+        return answer, file_name, audio_route, chat_count, visualized_name
 
 

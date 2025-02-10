@@ -105,7 +105,8 @@ function HomeContent() {
         error: false,
         imageName: parsedResponse.imageName, // 이미지 정보
         fileNames: parsedResponse.fileNames,  // PDF 정보
-        audioFileName: parsedResponse.audioFileName // TTS 오디오 파일 정보 // 출처 정보 추가
+        audioFileName: parsedResponse.audioFileName, // TTS 오디오 파일 정보 // 출처 정보 추가
+        visualized_name: parsedResponse.visualized_name,
       };
 
       // 마지막 질문만 업데이트

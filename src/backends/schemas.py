@@ -14,6 +14,7 @@ class QueryServiceResponse(BaseModel):
     answer: str
     pdfFileNames: List[str]
     audioFileNames: str
+    visualized_name: str
 
 class Image(BaseModel):
     id: int

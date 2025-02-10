@@ -11,31 +11,34 @@ app = FastAPI()
 
 @app.post("/query_closed_domain", response_model=QueryServiceResponse)
 async def closed_domain_query(request: QueryRequest):
-    answer, file_names, audio_route, chat_count = await pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
+    answer, file_names, audio_route, chat_count, visualized_name = await pipe.QA(request.query, mode = 'ensemble', search_type = 'closed_domain')
     print('ok')
 
     return {
         "answer": answer,
         "pdfFileNames" : file_names,
         "audioFileNames" : audio_route,
+        'visualized_name' : visualized_name
     }
 
 @app.post("/query_open_domain", response_model = QueryServiceResponse)
 async def open_domain_query(request: QueryRequest):
-    answer, file_names, audio_route, chat_count = await pipe.QA(request.query, mode = 'ensemble', search_type = 'open_domain')
+    answer, file_names, audio_route, chat_count, visualized_name = await pipe.QA(request.query, mode = 'ensemble', search_type = 'open_domain')
     return {
         "answer": answer,
         "pdfFileNames" : file_names,
         "audioFileNames" : audio_route,
+        'visualized_name' : visualized_name
     }
 
 @app.post("/query", response_model = QueryServiceResponse)
 async def service_query(request: QueryRequest):
-    answer, file_names, audio_route, chat_count = await pipe.QA(request.query, mode = 'ensemble')
+    answer, file_names, audio_route, chat_count, visualized_name = await pipe.QA(request.query, mode = 'ensemble')
     return {
         "answer": answer,
         "pdfFileNames" : file_names,
         "audioFileNames" : audio_route,
+        "visualized_name" : visualized_name
     }
 
 @app.get("/reset_output")
