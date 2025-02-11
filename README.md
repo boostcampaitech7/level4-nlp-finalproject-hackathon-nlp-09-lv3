@@ -31,11 +31,24 @@ FinBuddy는 증권사 보고서를 활용한 LLM 기반 주식 정보 제공 서
 - **RAG** : ChromaDB 기반 벡터 검색 및 문서 임베딩
 - **데이터 전처리** : PDF 문서 파싱 및 요약 모델 적용
 - **모델 학습 및 평가** : 
+- **AI Agent** :
 - **API 개발** : FastAPI 기반 백엔드 구축
 - **Frontend** : React 기반 프론트엔드 구축
 
 
 ## 3. 프로젝트 결과
+### 서비스 아키텍처
+
+### 3.1. 데이터 전처리
+
+### 3.2. 모델 학습 및 평가
+
+### 3.3. API 개발
+
+### 3.4. Frontend 및 API 개발
+
+
+
 
 ## 4. Team
 <table>
@@ -88,4 +101,10 @@ FinBuddy는 증권사 보고서를 활용한 LLM 기반 주식 정보 제공 서
 - [LangChain](https://python.langchain.com/docs/get_started/introduction)
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [React](https://react.dev/)
+- [GPT-4o-mini](https://platform.openai.com/docs/models/gpt-4o-mini)
+- [LG EXAONE](https://exaone.lge.com/exaone-api)
+- [Qwen](https://qwen.baidu.com/doc/index)
 
+
+1. 리드미 수정 1시간 이걸 지금 다같이 해
+2. 발표대본 오늘 안에만 하면돼 (용준)
