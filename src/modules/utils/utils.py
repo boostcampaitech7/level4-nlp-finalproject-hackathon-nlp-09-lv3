@@ -30,6 +30,8 @@ def get_only_paragraphs(BASE_DIR):
     df = df.reset_index(drop=True)
     # 정량평가를 위해, 그래프와 테이블을 제외하고 paragraph만 가져옵니다.
     df = df[df['type'] == 'paragraph']
+    df = df.drop(df[df['original_content'].str.contains('@')].index).reset_index(drop = True)
+    df = df.drop(df[df['original_content'].str.contains(r'자료:\s?', regex=True)]['original_content'].index).reset_index(drop= True)
     return df
 
 def get_pdf_routes(BASE_DIR):
