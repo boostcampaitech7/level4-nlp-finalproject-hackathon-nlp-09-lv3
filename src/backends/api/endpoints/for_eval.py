@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from ...schemas import QueryRequest, QueryEvalResponse
 
 pipe = pipe_eval(verbose = False)
-pipe.setup(model = 'GPT')
+pipe.setup(model = 'Exaone')
 app = FastAPI()
 
 @app.post("/query", response_model=QueryEvalResponse)
