@@ -131,8 +131,7 @@ FinBuddy는 증권사 보고서를 활용한 LLM 기반 주식 정보 제공 서
 ### ✨ 분석 환경
 - Upstage AI Stages 제공 NVIDIA V100 GPU Server 활용
 - OS : Linux
-- Language : Python, JavaScript
-- Libraries(mainly used) : Pytorch, HuggingFace, FastAPI, React, LangChain, ChromaDB, etc.
+
 <br>
 
 ### 🏗 기술 스택
