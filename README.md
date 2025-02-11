@@ -72,7 +72,7 @@ FinBuddy는 증권사 보고서를 활용한 LLM 기반 주식 정보 제공 서
 <img width="1426" alt="스크린샷 2025-02-11 오후 4 10 37" src="https://github.com/user-attachments/assets/f0bbaac6-9cb7-43c0-94ed-c6dbf92042bd" />
 </br>
 
-### 2.1. 데이터 전처리
+### 🔍 데이터 전처리
 **제공 데이터**
 <img width="1421" alt="스크린샷 2025-02-11 오후 4 13 47" src="https://github.com/user-attachments/assets/83f9e8c4-0ab1-42f1-a264-4d047a7cb5b0" />
 </br>
@@ -81,35 +81,33 @@ FinBuddy는 증권사 보고서를 활용한 LLM 기반 주식 정보 제공 서
 <img width="1422" alt="스크린샷 2025-02-11 오후 4 13 19" src="https://github.com/user-attachments/assets/feef88f5-3433-4e6b-957a-b66db79d9383" />
 </br>
 
-### 2.2 AI Agent 구조
+###  💬 AI Agent 구조
 <img width="1424" alt="스크린샷 2025-02-11 오후 4 11 15" src="https://github.com/user-attachments/assets/a758fa7b-02c3-4cb0-8410-969107a57f62" />
 </br>
 
-### 2.3. 모델 학습 및 평가
+### 🔍 모델 학습 및 평가
 <img width="1427" alt="스크린샷 2025-02-11 오후 4 11 00" src="https://github.com/user-attachments/assets/f448783e-a244-4cdc-9184-53527a25139e" />
 </br>
 
-### 2.4. Backend 개발
+### 🔍 Backend 개발
 FastAPI를 이용한 REST API 구성
 - Open domain : 네이버 뉴스 검색을 통한 최신 정보 확인 가능
 - Closed domain : 제공된 데이터 기반 RAG
 - query : Chat-GPT 4o mini API 연동
 
 
-### 2.5. Frontend 개발
+### 🔍 Frontend 개발
 axios를 이용한 API 연동
 리액트 훅을 이용한 페이지 변수 값 상태 관리
 
-## 4. 프로젝트 결과
+## 3. 프로젝트 결과
 
 ### 시연 영상
 <div align="center">
-<video src = "" controls></video>
+<video src = "https://github.com/user-attachments/assets/c270dc58-90fe-4d09-8f56-face7eca4eec" controls></video>
 </div>
 
-
-
-## 5. Team
+## 4. Team
 <table>
     <tbody>
         <tr>
