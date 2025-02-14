@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #171717;
+  --primary: #4A90E2;
+  --secondary: #F5F5F5;
+  --chat-user: #F5F5F5;
+  --chat-ai: #F5F5F5;
+  --button: #4A90E2;
+  --button-hover: #357ABD;
+  --example-box: #F5F5F5;
+  --example-box-hover: #E8E8E8;
+  --icon-color: #171717;
+}
+
+[data-theme='dark'] {
+  --background: #1E1E1E;
+  --foreground: #ffffff;
+  --primary: #4A90E2;
+  --secondary: #2C2C2C;
+  --chat-user: #2C2C2C;
+  --chat-ai: #2C2C2C;
+  --chat-text: #ffffff; 
+  --button: #2C2C2C;
+  --button-hover: #3C3C3C;
+  --example-box: #2C2C2C;
+  --example-box-hover: #3C3C3C;
+  --icon-color: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.chat-area {
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.search-area {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem;
+}
